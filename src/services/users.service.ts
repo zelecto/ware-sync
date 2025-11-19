@@ -7,9 +7,29 @@ export interface CreateUserDto {
   role: UserRole;
 }
 
+export interface CreateUserWithPersonDto {
+  fullName: string;
+  cedula: string;
+  phone: string;
+  email: string;
+  address?: string;
+  password: string;
+  role: UserRole;
+}
+
 export interface UpdateUserDto {
   password?: string;
   role?: UserRole;
+}
+
+export interface UpdateUserWithPersonDto {
+  fullName: string;
+  cedula: string;
+  phone: string;
+  email: string;
+  address?: string;
+  password?: string;
+  role: UserRole;
 }
 
 export const usersService = {
@@ -53,7 +73,26 @@ export const usersService = {
     }
   },
 
+  async createWithPerson(data: CreateUserWithPersonDto): Promise<User> {
+    try {
+      return await apiClient.post<User>("/users", data);
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
   async update(id: string, data: UpdateUserDto): Promise<User> {
+    try {
+      return await apiClient.patch<User>(`/users/${id}`, data);
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async updateWithPerson(
+    id: string,
+    data: UpdateUserWithPersonDto
+  ): Promise<User> {
     try {
       return await apiClient.patch<User>(`/users/${id}`, data);
     } catch (error) {

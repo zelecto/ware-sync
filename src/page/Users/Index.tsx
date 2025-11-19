@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { UserRole } from "@/interface/user";
 import { Button } from "@/components/ui/button";
 import { UserTable } from "@/components/user";
@@ -14,17 +15,21 @@ import {
 } from "@/components/ui/select";
 
 export default function Index() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<"ALL" | UserRole>("ALL");
 
   const handleEdit = (user: any) => {
-    console.log("Editar usuario:", user);
+    navigate(`/users/edit/${user.id}`);
   };
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Usuarios</h1>
-        <Button endContent={<Plus></Plus>}>Crear nuevo</Button>
+        <Button onClick={() => navigate("/users/create")}>
+          <Plus className="w-4 h-4 mr-2" />
+          Crear nuevo
+        </Button>
       </div>
 
       <Card>

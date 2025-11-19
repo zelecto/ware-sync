@@ -5,6 +5,8 @@ import Home from "@/page/Home";
 import Login from "@/page/auth/Login";
 import Dashboard from "@/page/Dasboard/Dashboard";
 import Users from "@/page/Users/Index";
+import CreateUser from "@/page/Users/Create";
+import EditUser from "@/page/Users/Edit";
 import Contacts from "@/page/Contacts/Index";
 import NotFound from "@/page/NotFound";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -50,6 +52,14 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <Users />,
+          },
+          {
+            path: "create",
+            element: <CreateUser />,
+          },
+          {
+            path: "edit/:id",
+            element: <EditUser />,
           },
         ],
       },
