@@ -4,6 +4,8 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import Home from "@/page/Home";
 import Login from "@/page/auth/Login";
 import Dashboard from "@/page/Dasboard/Dashboard";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { PublicRoute } from "@/components/auth/PublicRoute";
 
 export const router = createBrowserRouter([
   {
@@ -15,18 +17,28 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "login",
-        element: <Login />,
+        element: <PublicRoute />,
+        children: [
+          {
+            path: "login",
+            element: <Login />,
+          },
+        ],
       },
     ],
   },
   {
-    path: "/dashboard",
-    element: <DashboardLayout />,
+    element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <Dashboard />,
+        path: "/dashboard",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <Dashboard />,
+          },
+        ],
       },
     ],
   },

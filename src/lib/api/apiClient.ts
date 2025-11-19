@@ -20,7 +20,7 @@ class ApiClient {
       baseURL:
         config?.baseURL ||
         import.meta.env.VITE_API_BASE_URL ||
-        "http://localhost:3000/api",
+        "http://localhost:3000",
       timeout: config?.timeout || 10000,
       headers: {
         "Content-Type": "application/json",
@@ -64,7 +64,11 @@ class ApiClient {
         if (error.response?.status === 401) {
           // Token expirado o no autorizado
           localStorage.removeItem("token");
-          window.location.href = "/login";
+          localStorage.removeItem("user");
+          // Solo redirigir si no estamos ya en login
+          if (!window.location.pathname.includes("/login")) {
+            window.location.href = "/login";
+          }
         }
         return Promise.reject(error);
       }

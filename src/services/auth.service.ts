@@ -5,13 +5,24 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface LoginResponse {
-  token: string;
-  user?: {
+export interface User {
+  id: string;
+  personId: string;
+  role: string;
+  person: {
     id: string;
+    fullName: string;
+    cedula: string;
+    phone: string;
     email: string;
-    name?: string;
+    address: string;
   };
+}
+
+export interface LoginResponse {
+  message: string;
+  user: User;
+  accessToken: string;
 }
 
 export const authService = {
@@ -22,8 +33,12 @@ export const authService = {
         credentials
       );
 
-      if (response.token) {
-        localStorage.setItem("token", response.token);
+      if (response.accessToken) {
+        localStorage.setItem("token", response.accessToken);
+      }
+
+      if (response.user) {
+        localStorage.setItem("user", JSON.stringify(response.user));
       }
 
       return response;
@@ -34,10 +49,33 @@ export const authService = {
 
   logout() {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
   },
 
   getToken(): string | null {
     return localStorage.getItem("token");
+  },
+
+  getCurrentUser(): User | null {
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const userStr = localStorage.getItem("user");
+
+      if (userStr) {
+        return JSON.parse(userStr);
+      }
+
+      this.logout();
+      return null;
+    } catch (error) {
+      this.logout();
+      return null;
+    }
   },
 
   isAuthenticated(): boolean {

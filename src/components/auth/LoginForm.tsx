@@ -18,6 +18,7 @@ import {
 import { authService } from "@/services/auth.service";
 import { ApiError } from "@/services/api";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 function zodToFormikValidate(schema: typeof loginSchema) {
   return (values: LoginFormValues) => {
@@ -42,6 +43,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const formik = useFormik<LoginFormValues>({
     initialValues: {
@@ -52,8 +54,9 @@ export function LoginForm({
     onSubmit: async (values) => {
       setApiError("");
       try {
-        await authService.login(values);
-        navigate("/dashboard");
+        const response = await authService.login(values);
+        setUser(response.user);
+        navigate("/dashboard", { replace: true });
       } catch (error) {
         if (error instanceof ApiError) {
           setApiError(error.message);
@@ -65,7 +68,7 @@ export function LoginForm({
   });
 
   return (
-    <div className={cn("flex flex-col gap-6 w-lg", className)} {...props}>
+    <div className={cn("flex flex-col gap-6 w-sm", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Bienvenido de nuevo</CardTitle>
