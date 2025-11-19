@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { ContactType } from "@/interface/contact";
 import { Button } from "@/components/ui/button";
 import { ContactTable } from "@/components/contact";
@@ -13,17 +14,18 @@ import {
 } from "@/components/ui/select";
 
 export default function Contacts() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<"ALL" | ContactType>("ALL");
 
   const handleEdit = (contact: any) => {
-    console.log("Editar contacto:", contact);
+    navigate(`/contacts/edit/${contact.id}`);
   };
 
   return (
-    <div className="">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Contactos</h1>
-        <Button>
+        <Button onClick={() => navigate("/contacts/create")}>
           <Plus className="w-4 h-4 mr-2" />
           Crear nuevo
         </Button>

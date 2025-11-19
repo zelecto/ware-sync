@@ -6,9 +6,27 @@ export interface CreateContactDto {
   type: ContactType;
 }
 
+export interface CreateContactWithPersonDto {
+  fullName: string;
+  cedula: string;
+  phone: string;
+  email: string;
+  address?: string;
+  type: ContactType;
+}
+
 export interface UpdateContactDto {
   personId?: string;
   type?: ContactType;
+}
+
+export interface UpdateContactWithPersonDto {
+  fullName: string;
+  cedula: string;
+  phone: string;
+  email: string;
+  address?: string;
+  type: ContactType;
 }
 
 export const contactsService = {
@@ -52,7 +70,26 @@ export const contactsService = {
     }
   },
 
+  async createWithPerson(data: CreateContactWithPersonDto): Promise<Contact> {
+    try {
+      return await apiClient.post<Contact>("/contacts", data);
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
   async update(id: string, data: UpdateContactDto): Promise<Contact> {
+    try {
+      return await apiClient.patch<Contact>(`/contacts/${id}`, data);
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async updateWithPerson(
+    id: string,
+    data: UpdateContactWithPersonDto
+  ): Promise<Contact> {
     try {
       return await apiClient.patch<Contact>(`/contacts/${id}`, data);
     } catch (error) {

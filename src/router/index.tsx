@@ -8,6 +8,8 @@ import Users from "@/page/Users/Index";
 import CreateUser from "@/page/Users/Create";
 import EditUser from "@/page/Users/Edit";
 import Contacts from "@/page/Contacts/Index";
+import CreateContact from "@/page/Contacts/Create";
+import EditContact from "@/page/Contacts/Edit";
 import NotFound from "@/page/NotFound";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PublicRoute } from "@/components/auth/PublicRoute";
@@ -70,6 +72,14 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <Contacts />,
+          },
+          {
+            path: "create",
+            element: <CreateContact />,
+          },
+          {
+            path: "edit/:id",
+            element: <EditContact />,
           },
         ],
       },
