@@ -1,4 +1,4 @@
-import { Home, Command } from "lucide-react";
+import { Home, Command, Users, Contact } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar,
@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/sidebar";
 import { NavUser } from "./NavUser";
 
-const menuItems = [{ title: "Dashboard", url: "/dashboard", icon: Home }];
+const menuItems = [
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Usuarios", url: "/users", icon: Users },
+  { title: "Contactos", url: "/contacts", icon: Contact },
+];
 
 const userData = {
   name: "Usuario",
