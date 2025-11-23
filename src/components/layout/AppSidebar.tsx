@@ -1,4 +1,11 @@
-import { Home, Command, Users, Contact } from "lucide-react";
+import {
+  Home,
+  Command,
+  Users,
+  Contact,
+  Package,
+  Warehouse,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar,
@@ -18,6 +25,8 @@ const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Usuarios", url: "/users", icon: Users },
   { title: "Contactos", url: "/contacts", icon: Contact },
+  { title: "Productos", url: "/products", icon: Package },
+  { title: "Almacenes", url: "/warehouses", icon: Warehouse },
 ];
 
 const userData = {

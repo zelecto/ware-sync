@@ -67,6 +67,11 @@ class ApiClient {
           localStorage.removeItem("user");
           // Solo redirigir si no estamos ya en login
           if (!window.location.pathname.includes("/login")) {
+            // Guardar la ruta actual para redirigir después del login
+            localStorage.setItem(
+              "redirectAfterLogin",
+              window.location.pathname
+            );
             window.location.href = "/login";
           }
         }

@@ -56,7 +56,12 @@ export function LoginForm({
       try {
         const response = await authService.login(values);
         setUser(response.user);
-        navigate("/dashboard", { replace: true });
+
+        // Redirigir a la ruta guardada o al dashboard por defecto
+        const redirectTo =
+          localStorage.getItem("redirectAfterLogin") || "/dashboard";
+        localStorage.removeItem("redirectAfterLogin");
+        navigate(redirectTo, { replace: true });
       } catch (error) {
         if (error instanceof ApiError) {
           setApiError(error.message);

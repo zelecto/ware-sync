@@ -10,6 +10,12 @@ import EditUser from "@/page/Users/Edit";
 import Contacts from "@/page/Contacts/Index";
 import CreateContact from "@/page/Contacts/Create";
 import EditContact from "@/page/Contacts/Edit";
+import Products from "@/page/Products/Index";
+import CreateProduct from "@/page/Products/Create";
+import EditProduct from "@/page/Products/Edit";
+import Warehouses from "@/page/Warehouses/Index";
+import CreateWarehouse from "@/page/Warehouses/Create";
+import EditWarehouse from "@/page/Warehouses/Edit";
 import NotFound from "@/page/NotFound";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PublicRoute } from "@/components/auth/PublicRoute";
@@ -80,6 +86,42 @@ export const router = createBrowserRouter([
           {
             path: "edit/:id",
             element: <EditContact />,
+          },
+        ],
+      },
+      {
+        path: "/products",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <Products />,
+          },
+          {
+            path: "create",
+            element: <CreateProduct />,
+          },
+          {
+            path: "edit/:id",
+            element: <EditProduct />,
+          },
+        ],
+      },
+      {
+        path: "/warehouses",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <Warehouses />,
+          },
+          {
+            path: "create",
+            element: <CreateWarehouse />,
+          },
+          {
+            path: "edit/:id",
+            element: <EditWarehouse />,
           },
         ],
       },
