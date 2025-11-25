@@ -5,6 +5,7 @@ import {
   Contact,
   Package,
   Warehouse,
+  Truck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -27,6 +28,7 @@ const menuItems = [
   { title: "Contactos", url: "/contacts", icon: Contact },
   { title: "Productos", url: "/products", icon: Package },
   { title: "Almacenes", url: "/warehouses", icon: Warehouse },
+  { title: "Distribuciones", url: "/distributions", icon: Truck },
 ];
 
 const userData = {

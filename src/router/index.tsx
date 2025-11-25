@@ -17,6 +17,9 @@ import ShowProduct from "@/page/Products/Show";
 import Warehouses from "@/page/Warehouses/Index";
 import CreateWarehouse from "@/page/Warehouses/Create";
 import EditWarehouse from "@/page/Warehouses/Edit";
+import Distributions from "@/page/Distributions/Index";
+import CreateDistribution from "@/page/Distributions/Create";
+import ShowDistribution from "@/page/Distributions/Show";
 import NotFound from "@/page/NotFound";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PublicRoute } from "@/components/auth/PublicRoute";
@@ -127,6 +130,24 @@ export const router = createBrowserRouter([
           {
             path: "edit/:id",
             element: <EditWarehouse />,
+          },
+        ],
+      },
+      {
+        path: "/distributions",
+        element: <DashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: <Distributions />,
+          },
+          {
+            path: "create",
+            element: <CreateDistribution />,
+          },
+          {
+            path: "show/:id",
+            element: <ShowDistribution />,
           },
         ],
       },

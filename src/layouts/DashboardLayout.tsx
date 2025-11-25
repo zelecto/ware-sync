@@ -18,8 +18,12 @@ const getBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
   const routeLabels: Record<string, string> = {
     users: "Usuarios",
     contacts: "Contactos",
+    products: "Productos",
+    warehouses: "Almacenes",
+    distributions: "Distribuciones",
     create: "Crear",
     edit: "Editar",
+    show: "Detalle",
   };
 
   // Construir breadcrumbs dinámicamente
