@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, Eye } from "lucide-react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import {
   Table,
@@ -19,6 +20,7 @@ interface ProductTableProps {
 }
 
 export function ProductTable({ onEdit }: ProductTableProps) {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +120,16 @@ export function ProductTable({ onEdit }: ProductTableProps) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => navigate(`/products/${product.id}`)}
+                      title="Ver detalles"
+                    >
+                      <Eye className="w-4 h-4 text-gray-700" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => onEdit(product)}
+                      title="Editar"
                     >
                       <Pencil className="w-4 h-4 text-blue-600" />
                     </Button>
@@ -126,6 +137,7 @@ export function ProductTable({ onEdit }: ProductTableProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(product.id)}
+                      title="Eliminar"
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
                     </Button>

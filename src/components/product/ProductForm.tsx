@@ -105,7 +105,6 @@ export function ProductForm({
       }
     }
 
-    // Validar que haya al menos un almacén
     if (values.warehouseStocks.length === 0) {
       errors.warehouseStocks = "Debes agregar al menos un almacén";
     }

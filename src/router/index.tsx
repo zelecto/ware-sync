@@ -13,6 +13,7 @@ import EditContact from "@/page/Contacts/Edit";
 import Products from "@/page/Products/Index";
 import CreateProduct from "@/page/Products/Create";
 import EditProduct from "@/page/Products/Edit";
+import ShowProduct from "@/page/Products/Show";
 import Warehouses from "@/page/Warehouses/Index";
 import CreateWarehouse from "@/page/Warehouses/Create";
 import EditWarehouse from "@/page/Warehouses/Edit";
@@ -100,6 +101,10 @@ export const router = createBrowserRouter([
           {
             path: "create",
             element: <CreateProduct />,
+          },
+          {
+            path: ":id",
+            element: <ShowProduct />,
           },
           {
             path: "edit/:id",

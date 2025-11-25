@@ -1,0 +1,91 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ProductDetail } from "@/components/product/ProductDetail";
+import { productsService } from "@/services/products.service";
+import type { Product } from "@/types/product";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+
+export default function ShowProduct() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) {
+        setError("ID de producto no proporcionado");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await productsService.findOne(id);
+        setProduct(data);
+      } catch (err) {
+        console.error("Error al cargar el producto:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "No se pudo cargar el producto. Por favor, intenta de nuevo."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+            <p className="text-lg font-medium text-foreground">
+              Cargando producto...
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Por favor espera un momento
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-destructive">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+            <h2 className="text-xl font-semibold text-foreground mb-2">
+              Error al cargar
+            </h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              {error || "Producto no encontrado"}
+            </p>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => navigate("/products")}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver a productos
+              </Button>
+              <Button onClick={() => window.location.reload()}>
+                Reintentar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return <ProductDetail product={product} />;
+}
