@@ -60,7 +60,12 @@ export function DataTable<T = any>({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key}>{column.header}</TableHead>
+                <TableHead
+                  key={column.key}
+                  className={column.key === "actions" ? "text-right" : ""}
+                >
+                  {column.header}
+                </TableHead>
               ))}
             </TableRow>
           </TableHeader>

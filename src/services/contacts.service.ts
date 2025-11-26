@@ -35,14 +35,6 @@ export interface UpdateContactWithPersonDto {
 }
 
 export const contactsService = {
-  async findAll(): Promise<Contact[]> {
-    try {
-      return await apiClient.get<Contact[]>("/contacts");
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
   async findAllPaginated(
     params: PaginationParams
   ): Promise<PaginatedResponse<Contact>> {
@@ -56,17 +48,28 @@ export const contactsService = {
     }
   },
 
-  async findByType(type: ContactType): Promise<Contact[]> {
+  async findByTypePaginated(
+    type: ContactType,
+    params: PaginationParams
+  ): Promise<PaginatedResponse<Contact>> {
     try {
-      return await apiClient.get<Contact[]>(`/contacts?type=${type}`);
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<Contact>>(
+        `/contacts?type=${type}&${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }
   },
 
-  async findAllWithDeleted(): Promise<Contact[]> {
+  async findAllWithDeletedPaginated(
+    params: PaginationParams
+  ): Promise<PaginatedResponse<Contact>> {
     try {
-      return await apiClient.get<Contact[]>("/contacts/with-deleted");
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<Contact>>(
+        `/contacts/with-deleted?${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }

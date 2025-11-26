@@ -23,14 +23,15 @@ export default function CreateDistribution() {
     const loadData = async () => {
       try {
         setDataLoading(true);
-        const [warehousesData, contactsData, productsData] = await Promise.all([
-          warehousesService.findAll(),
-          contactsService.findAll(),
-          productsService.findAll(),
-        ]);
-        setWarehouses(warehousesData);
-        setContacts(contactsData);
-        setProducts(productsData);
+        const [warehousesResponse, contactsResponse, productsResponse] =
+          await Promise.all([
+            warehousesService.findAllPaginated({ page: 1, limit: 50 }),
+            contactsService.findAllPaginated({ page: 1, limit: 50 }),
+            productsService.findAllPaginated({ page: 1, limit: 50 }),
+          ]);
+        setWarehouses(warehousesResponse.data);
+        setContacts(contactsResponse.data);
+        setProducts(productsResponse.data);
       } catch (error: any) {
         toast.error("Error al cargar los datos");
       } finally {

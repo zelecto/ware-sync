@@ -19,14 +19,6 @@ export interface UpdateWarehouseDto {
 }
 
 export const warehousesService = {
-  async findAll(): Promise<Warehouse[]> {
-    try {
-      return await apiClient.get<Warehouse[]>("/warehouse");
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
   async findAllPaginated(
     params: PaginationParams
   ): Promise<PaginatedResponse<Warehouse>> {

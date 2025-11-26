@@ -28,32 +28,21 @@ export function ContactTable({ filter, onEdit }: ContactTableProps) {
       setLoading(true);
       setError(null);
 
-      // Si hay filtro, usar el método sin paginación (por ahora)
-      // TODO: Implementar filtro con paginación en el backend
-      if (filter !== "ALL") {
-        const data = await contactsService.findByType(filter);
-        setContacts(data || []);
-        // Simular metadata para filtros
-        pagination.updateFromMeta({
-          page: 1,
-          limit: data.length,
-          total: data.length,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        });
-      } else {
-        const rawResponse = await contactsService.findAllPaginated(
-          pagination.paginationParams
-        );
-        const { data, meta } = handlePaginatedResponse<Contact>(
-          rawResponse,
-          pagination.currentPage,
-          pagination.limit
-        );
-        setContacts(data);
-        pagination.updateFromMeta(meta);
-      }
+      const rawResponse =
+        filter !== "ALL"
+          ? await contactsService.findByTypePaginated(
+              filter,
+              pagination.paginationParams
+            )
+          : await contactsService.findAllPaginated(pagination.paginationParams);
+
+      const { data, meta } = handlePaginatedResponse<Contact>(
+        rawResponse,
+        pagination.currentPage,
+        pagination.limit
+      );
+      setContacts(data);
+      pagination.updateFromMeta(meta);
     } catch (err: any) {
       setError(err.message || "Error al cargar contactos");
       setContacts([]);

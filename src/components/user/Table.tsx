@@ -28,32 +28,21 @@ export function UserTable({ filter, onEdit }: UserTableProps) {
       setLoading(true);
       setError(null);
 
-      // Si hay filtro, usar el método sin paginación (por ahora)
-      // TODO: Implementar filtro con paginación en el backend
-      if (filter !== "ALL") {
-        const data = await usersService.findByRole(filter);
-        setUsers(data || []);
-        // Simular metadata para filtros
-        pagination.updateFromMeta({
-          page: 1,
-          limit: data.length,
-          total: data.length,
-          totalPages: 1,
-          hasNextPage: false,
-          hasPreviousPage: false,
-        });
-      } else {
-        const rawResponse = await usersService.findAllPaginated(
-          pagination.paginationParams
-        );
-        const { data, meta } = handlePaginatedResponse<User>(
-          rawResponse,
-          pagination.currentPage,
-          pagination.limit
-        );
-        setUsers(data);
-        pagination.updateFromMeta(meta);
-      }
+      const rawResponse =
+        filter !== "ALL"
+          ? await usersService.findByRolePaginated(
+              filter,
+              pagination.paginationParams
+            )
+          : await usersService.findAllPaginated(pagination.paginationParams);
+
+      const { data, meta } = handlePaginatedResponse<User>(
+        rawResponse,
+        pagination.currentPage,
+        pagination.limit
+      );
+      setUsers(data);
+      pagination.updateFromMeta(meta);
     } catch (err: any) {
       setError(err.message || "Error al cargar usuarios");
       setUsers([]);

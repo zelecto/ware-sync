@@ -38,14 +38,6 @@ export interface UpdateUserWithPersonDto {
 }
 
 export const usersService = {
-  async findAll(): Promise<User[]> {
-    try {
-      return await apiClient.get<User[]>("/users");
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
   async findAllPaginated(
     params: PaginationParams
   ): Promise<PaginatedResponse<User>> {
@@ -59,17 +51,28 @@ export const usersService = {
     }
   },
 
-  async findByRole(role: UserRole): Promise<User[]> {
+  async findByRolePaginated(
+    role: UserRole,
+    params: PaginationParams
+  ): Promise<PaginatedResponse<User>> {
     try {
-      return await apiClient.get<User[]>(`/users?role=${role}`);
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<User>>(
+        `/users?role=${role}&${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }
   },
 
-  async findAllWithDeleted(): Promise<User[]> {
+  async findAllWithDeletedPaginated(
+    params: PaginationParams
+  ): Promise<PaginatedResponse<User>> {
     try {
-      return await apiClient.get<User[]>("/users/with-deleted");
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<User>>(
+        `/users/with-deleted?${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }

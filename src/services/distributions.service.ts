@@ -23,14 +23,6 @@ export interface UpdateDistributionDto {
 }
 
 export const distributionsService = {
-  async findAll(): Promise<Distribution[]> {
-    try {
-      return await apiClient.get<Distribution[]>("/distribution");
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
   async findAllPaginated(
     params: PaginationParams
   ): Promise<PaginatedResponse<Distribution>> {

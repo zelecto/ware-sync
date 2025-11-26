@@ -37,14 +37,6 @@ export interface UpdateProductDto {
 }
 
 export const productsService = {
-  async findAll(): Promise<Product[]> {
-    try {
-      return await apiClient.get<Product[]>("/product");
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-
   async findAllPaginated(
     params: PaginationParams
   ): Promise<PaginatedResponse<Product>> {

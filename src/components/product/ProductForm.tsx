@@ -63,8 +63,11 @@ export function ProductForm({
   useEffect(() => {
     const loadWarehouses = async () => {
       try {
-        const data = await warehousesService.findAll();
-        setWarehouses(data);
+        const response = await warehousesService.findAllPaginated({
+          page: 1,
+          limit: 50,
+        });
+        setWarehouses(response.data);
       } catch (error) {
         console.error("Error al cargar almacenes:", error);
       } finally {
