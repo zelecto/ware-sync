@@ -5,6 +5,7 @@ import { DistributionDetail } from "@/components/distribution";
 import { distributionsService } from "@/services/distributions.service";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Distribution } from "@/interface/distribution";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function ShowDistribution() {
   const navigate = useNavigate();
@@ -15,6 +16,16 @@ export default function ShowDistribution() {
     open: boolean;
     type: "complete" | "cancel" | null;
   }>({ open: false, type: null });
+
+  // Actualizar breadcrumb con información de la distribución
+  const breadcrumbLabel = distribution
+    ? `${distribution.originWarehouse.name} → ${
+        distribution.destinationWarehouse?.name ||
+        distribution.contact?.person.fullName ||
+        "Cliente"
+      }`
+    : "Detalle";
+  useBreadcrumbItem(breadcrumbLabel);
 
   const loadDistribution = async () => {
     if (!id) return;

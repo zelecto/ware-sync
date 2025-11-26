@@ -8,6 +8,7 @@ import { distributionsService } from "@/services/distributions.service";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Distribution } from "@/interface/distribution";
 import toast from "react-hot-toast";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Distributions() {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ export default function Distributions() {
     type: "complete" | "cancel" | "delete" | null;
     distributionId: string | null;
   }>({ open: false, type: null, distributionId: null });
+
+  // Actualizar breadcrumb
+  useBreadcrumbItem("Distribuciones");
 
   const loadDistributions = async () => {
     try {

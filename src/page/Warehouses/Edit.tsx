@@ -5,6 +5,7 @@ import { WarehouseForm } from "@/components/warehouse";
 import { warehousesService } from "@/services/warehouses.service";
 import type { Warehouse } from "@/interface/warehouse";
 import type { UpdateWarehouseDto } from "@/services/warehouses.service";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function EditWarehouse() {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ export default function EditWarehouse() {
   const [loading, setLoading] = useState(false);
   const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
   const [loadingWarehouse, setLoadingWarehouse] = useState(true);
+
+  // Actualizar breadcrumb con el nombre del almacén
+  useBreadcrumbItem(warehouse?.name || "Editar");
 
   useEffect(() => {
     const loadWarehouse = async () => {

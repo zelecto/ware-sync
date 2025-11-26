@@ -6,6 +6,7 @@ import type { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function ShowProduct() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +14,9 @@ export default function ShowProduct() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Actualizar breadcrumb con el nombre del producto
+  useBreadcrumbItem(product?.name || "Detalle");
 
   useEffect(() => {
     const fetchProduct = async () => {

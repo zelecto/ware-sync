@@ -13,10 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Index() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<"ALL" | UserRole>("ALL");
+
+  // Actualizar breadcrumb
+  useBreadcrumbItem("Usuarios");
 
   const handleEdit = (user: any) => {
     navigate(`/users/edit/${user.id}`);

@@ -12,10 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Contacts() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<"ALL" | ContactType>("ALL");
+
+  // Actualizar breadcrumb
+  useBreadcrumbItem("Contactos");
 
   const handleEdit = (contact: any) => {
     navigate(`/contacts/edit/${contact.id}`);

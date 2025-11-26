@@ -1,6 +1,18 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Home } from "lucide-react";
 
 export default function NotFound() {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const handleGoHome = () => {
+    navigate("/dashboard");
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="text-center">
@@ -11,12 +23,16 @@ export default function NotFound() {
         <p className="text-gray-600 mb-8">
           La página que buscas no existe o ha sido movida.
         </p>
-        <Link
-          to="/"
-          className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Volver al inicio
-        </Link>
+        <div className="flex gap-4 justify-center">
+          <Button onClick={handleGoBack} variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Volver atrás
+          </Button>
+          <Button onClick={handleGoHome}>
+            <Home className="w-4 h-4 mr-2" />
+            Ir al Dashboard
+          </Button>
+        </div>
       </div>
     </div>
   );

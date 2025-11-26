@@ -3,9 +3,13 @@ import { Button } from "@/components/ui/button";
 import { WarehouseTable } from "@/components/warehouse";
 import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Warehouses() {
   const navigate = useNavigate();
+
+  // Actualizar breadcrumb
+  useBreadcrumbItem("Almacenes");
 
   const handleEdit = (warehouse: any) => {
     navigate(`/warehouses/edit/${warehouse.id}`);

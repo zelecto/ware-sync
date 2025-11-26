@@ -7,6 +7,7 @@ import {
   type UpdateUserWithPersonDto,
 } from "@/services/users.service";
 import type { User } from "@/interface/user";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Edit() {
   const navigate = useNavigate();
@@ -14,6 +15,9 @@ export default function Edit() {
   const [loading, setLoading] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+
+  // Actualizar breadcrumb con el nombre del usuario
+  useBreadcrumbItem(user?.person.fullName || "Editar");
 
   useEffect(() => {
     const loadUser = async () => {

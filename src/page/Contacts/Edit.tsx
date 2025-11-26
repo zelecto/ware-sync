@@ -7,6 +7,7 @@ import {
   type UpdateContactWithPersonDto,
 } from "@/services/contacts.service";
 import type { Contact } from "@/interface/contact";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Edit() {
   const navigate = useNavigate();
@@ -14,6 +15,9 @@ export default function Edit() {
   const [loading, setLoading] = useState(false);
   const [loadingContact, setLoadingContact] = useState(true);
   const [contact, setContact] = useState<Contact | null>(null);
+
+  // Actualizar breadcrumb con el nombre del contacto
+  useBreadcrumbItem(contact?.person.fullName || "Editar");
 
   useEffect(() => {
     const loadContact = async () => {

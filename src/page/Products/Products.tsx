@@ -3,9 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ProductTable } from "@/components/product";
 import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Products() {
   const navigate = useNavigate();
+
+  // Actualizar breadcrumb
+  useBreadcrumbItem("Productos");
 
   const handleEdit = (product: any) => {
     navigate(`/products/edit/${product.id}`);

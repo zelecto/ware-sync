@@ -127,7 +127,7 @@ export function DistributionForm({
 
         return (
           <Form>
-            <Card className="max-w-3xl">
+            <Card className="max-w-lg">
               <CardHeader>
                 <h2 className="text-lg font-semibold">Nueva Distribución</h2>
               </CardHeader>
@@ -150,22 +150,28 @@ export function DistributionForm({
                           }}
                         >
                           <SelectTrigger
-                            className={
+                            className={`overflow-hidden max-w-56 ${
                               errors.originWarehouseId &&
                               touched.originWarehouseId
                                 ? "border-red-500"
                                 : ""
-                            }
+                            }`}
                           >
-                            <SelectValue placeholder="Seleccione bodega de origen" />
+                            <SelectValue
+                              placeholder="Seleccione bodega de origen"
+                              className="truncate"
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {warehouses.map((warehouse) => (
                               <SelectItem
                                 key={warehouse.id}
                                 value={warehouse.id}
+                                className="max-w-full"
                               >
-                                {warehouse.name} - {warehouse.city}
+                                <span className="truncate block">
+                                  {warehouse.name} - {warehouse.city}
+                                </span>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -194,8 +200,11 @@ export function DistributionForm({
                           }}
                           disabled={!!values.contactId}
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione bodega de destino" />
+                          <SelectTrigger className="overflow-hidden max-w-56">
+                            <SelectValue
+                              placeholder="Seleccione bodega de destino"
+                              className="truncate"
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {warehouses
@@ -204,8 +213,11 @@ export function DistributionForm({
                                 <SelectItem
                                   key={warehouse.id}
                                   value={warehouse.id}
+                                  className="max-w-full"
                                 >
-                                  {warehouse.name} - {warehouse.city}
+                                  <span className="truncate block">
+                                    {warehouse.name} - {warehouse.city}
+                                  </span>
                                 </SelectItem>
                               ))}
                           </SelectContent>
@@ -228,13 +240,22 @@ export function DistributionForm({
                         }}
                         disabled={!!values.destinationWarehouseId}
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione contacto" />
+                        <SelectTrigger className="overflow-hidden w-full">
+                          <SelectValue
+                            placeholder="Seleccione contacto"
+                            className="truncate"
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {contacts.map((contact) => (
-                            <SelectItem key={contact.id} value={contact.id}>
-                              {contact.person.fullName} - {contact.type}
+                            <SelectItem
+                              key={contact.id}
+                              value={contact.id}
+                              className="max-w-full"
+                            >
+                              <span className="truncate block">
+                                {contact.person.fullName} - {contact.type}
+                              </span>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -270,6 +291,16 @@ export function DistributionForm({
                               )
                             : 0;
 
+                          // Filtrar productos ya seleccionados en otros campos
+                          const selectedProductIds = values.details
+                            .map((d, i) => (i !== index ? d.productId : null))
+                            .filter(Boolean);
+
+                          const availableProductsForThisField =
+                            availableProducts.filter(
+                              (p) => !selectedProductIds.includes(p.id)
+                            );
+
                           return (
                             <div
                               key={index}
@@ -279,7 +310,7 @@ export function DistributionForm({
                                 {({ field }: FieldProps) => (
                                   <div className="flex-1 space-y-1">
                                     <Select
-                                      value={field.value}
+                                      value={field.value || undefined}
                                       onValueChange={(value) =>
                                         setFieldValue(
                                           `details.${index}.productId`,
@@ -288,28 +319,37 @@ export function DistributionForm({
                                       }
                                       disabled={!values.originWarehouseId}
                                     >
-                                      <SelectTrigger className="h-9">
-                                        <SelectValue placeholder="Seleccione producto" />
+                                      <SelectTrigger className="h-9 overflow-hidden">
+                                        <SelectValue
+                                          placeholder="Seleccione producto"
+                                          className="truncate"
+                                        />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {availableProducts.map((product) => {
-                                          const warehouseProduct =
-                                            product.warehouses?.find(
-                                              (wp) =>
-                                                wp.warehouseId ===
-                                                values.originWarehouseId
+                                        {availableProductsForThisField.map(
+                                          (product) => {
+                                            const warehouseProduct =
+                                              product.warehouses?.find(
+                                                (wp) =>
+                                                  wp.warehouseId ===
+                                                  values.originWarehouseId
+                                              );
+                                            return (
+                                              <SelectItem
+                                                key={product.id}
+                                                value={product.id}
+                                                className="max-w-full"
+                                              >
+                                                <span className="truncate block">
+                                                  {product.name} ({product.sku}){" "}
+                                                  - Stock:{" "}
+                                                  {warehouseProduct?.quantity ||
+                                                    0}
+                                                </span>
+                                              </SelectItem>
                                             );
-                                          return (
-                                            <SelectItem
-                                              key={product.id}
-                                              value={product.id}
-                                            >
-                                              {product.name} ({product.sku}) -
-                                              Stock:{" "}
-                                              {warehouseProduct?.quantity || 0}
-                                            </SelectItem>
-                                          );
-                                        })}
+                                          }
+                                        )}
                                       </SelectContent>
                                     </Select>
                                     {field.value && stock > 0 && (

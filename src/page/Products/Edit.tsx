@@ -5,6 +5,7 @@ import { ProductForm } from "@/components/product";
 import { productsService } from "@/services/products.service";
 import type { Product } from "@/interface/product";
 import type { UpdateProductDto } from "@/services/products.service";
+import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function EditProduct() {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ export default function EditProduct() {
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [loadingProduct, setLoadingProduct] = useState(true);
+
+  // Actualizar breadcrumb con el nombre del producto
+  useBreadcrumbItem(product?.name || "Editar");
 
   useEffect(() => {
     const loadProduct = async () => {
