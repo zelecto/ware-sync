@@ -1,5 +1,10 @@
 import { apiClient, handleApiError } from "./api";
 import type { User, UserRole } from "@/interface/user";
+import type {
+  PaginatedResponse,
+  PaginationParams,
+} from "@/interface/pagination";
+import { createPaginationQueryParams } from "@/lib/pagination-utils";
 
 export interface CreateUserDto {
   personId: string;
@@ -36,6 +41,19 @@ export const usersService = {
   async findAll(): Promise<User[]> {
     try {
       return await apiClient.get<User[]>("/users");
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async findAllPaginated(
+    params: PaginationParams
+  ): Promise<PaginatedResponse<User>> {
+    try {
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<User>>(
+        `/users?${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }

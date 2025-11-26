@@ -1,14 +1,38 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { DistributionTable } from "@/components/distribution";
-import { Plus } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Eye, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui";
 import { distributionsService } from "@/services/distributions.service";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Distribution } from "@/interface/distribution";
+import { DistributionStatus } from "@/interface/distribution";
+import { formatDateTime } from "@/lib/date-utils";
 import toast from "react-hot-toast";
 import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
+import { usePagination } from "@/hooks/usePagination";
+import { handlePaginatedResponse } from "@/lib/pagination-helper";
+
+const statusConfig: Record<
+  DistributionStatus,
+  { label: string; variant: "default" | "destructive"; className?: string }
+> = {
+  [DistributionStatus.PENDING]: {
+    label: "Pendiente",
+    variant: "default",
+  },
+  [DistributionStatus.COMPLETED]: {
+    label: "Completada",
+    variant: "default",
+    className: "bg-green-500",
+  },
+  [DistributionStatus.CANCELLED]: {
+    label: "Cancelada",
+    variant: "destructive",
+  },
+};
 
 export default function Distributions() {
   const navigate = useNavigate();
@@ -20,16 +44,28 @@ export default function Distributions() {
     distributionId: string | null;
   }>({ open: false, type: null, distributionId: null });
 
-  // Actualizar breadcrumb
+  const pagination = usePagination({
+    initialLimit: 10,
+  });
+
   useBreadcrumbItem("Distribuciones");
 
   const loadDistributions = async () => {
     try {
       setLoading(true);
-      const data = await distributionsService.findAll();
+      const rawResponse = await distributionsService.findAllPaginated(
+        pagination.paginationParams
+      );
+      const { data, meta } = handlePaginatedResponse<Distribution>(
+        rawResponse,
+        pagination.currentPage,
+        pagination.limit
+      );
       setDistributions(data);
+      pagination.updateFromMeta(meta);
     } catch (error: any) {
       toast.error("Error al cargar las distribuciones");
+      setDistributions([]);
     } finally {
       setLoading(false);
     }
@@ -37,7 +73,7 @@ export default function Distributions() {
 
   useEffect(() => {
     loadDistributions();
-  }, []);
+  }, [pagination.currentPage, pagination.limit]);
 
   const handleView = (id: string) => {
     navigate(`/distributions/show/${id}`);
@@ -121,6 +157,135 @@ export default function Distributions() {
     }
   };
 
+  const columns = [
+    {
+      key: "originWarehouse",
+      header: "Bodega Origen",
+      render: (distribution: Distribution) => (
+        <div>
+          <div className="font-medium">{distribution.originWarehouse.name}</div>
+          <div className="text-sm text-muted-foreground">
+            {distribution.originWarehouse.city}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "destination",
+      header: "Destino",
+      render: (distribution: Distribution) => {
+        if (distribution.destinationWarehouse) {
+          return (
+            <div>
+              <div className="font-medium">
+                {distribution.destinationWarehouse.name}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {distribution.destinationWarehouse.city}
+              </div>
+            </div>
+          );
+        }
+        if (distribution.contact) {
+          return (
+            <div>
+              <div className="font-medium">
+                {distribution.contact.person.fullName}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {distribution.contact.type}
+              </div>
+            </div>
+          );
+        }
+        return "-";
+      },
+    },
+    {
+      key: "status",
+      header: "Estado",
+      render: (distribution: Distribution) => {
+        const config = statusConfig[distribution.status];
+        return (
+          <Badge variant={config.variant} className={config.className || ""}>
+            {config.label}
+          </Badge>
+        );
+      },
+    },
+    {
+      key: "details",
+      header: "Productos",
+      accessor: (distribution: Distribution) => distribution.details.length,
+    },
+    {
+      key: "creator",
+      header: "Creado Por",
+      accessor: (distribution: Distribution) =>
+        distribution.creator.person.fullName,
+    },
+    {
+      key: "createdAt",
+      header: "Fecha Creación",
+      render: (distribution: Distribution) => (
+        <div className="text-sm">{formatDateTime(distribution.createdAt)}</div>
+      ),
+    },
+    {
+      key: "updatedAt",
+      header: "Última Actualización",
+      render: (distribution: Distribution) => (
+        <div className="text-sm">{formatDateTime(distribution.updatedAt)}</div>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Acciones",
+      render: (distribution: Distribution) => (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleView(distribution.id)}
+            title="Ver detalles"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          {distribution.status === DistributionStatus.PENDING && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleComplete(distribution.id)}
+                title="Completar"
+              >
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleCancel(distribution.id)}
+                title="Cancelar"
+              >
+                <XCircle className="h-4 w-4 text-orange-600" />
+              </Button>
+            </>
+          )}
+          {distribution.status !== DistributionStatus.COMPLETED && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDelete(distribution.id)}
+              title="Eliminar"
+            >
+              <Trash2 className="h-4 w-4 text-red-600" />
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -136,19 +301,21 @@ export default function Distributions() {
           <h2 className="text-lg font-semibold">Lista de Distribuciones</h2>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <p className="text-center text-muted-foreground py-8">
-              Cargando distribuciones...
-            </p>
-          ) : (
-            <DistributionTable
-              distributions={distributions}
-              onView={handleView}
-              onComplete={handleComplete}
-              onCancel={handleCancel}
-              onDelete={handleDelete}
-            />
-          )}
+          <DataTable
+            data={distributions}
+            columns={columns}
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            limit={pagination.limit}
+            total={pagination.total}
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            limitOptions={pagination.limitOptions}
+            onPageChange={pagination.setPage}
+            onLimitChange={pagination.setLimit}
+            isLoading={loading}
+            emptyMessage="No hay distribuciones registradas"
+          />
         </CardContent>
       </Card>
 

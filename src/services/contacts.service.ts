@@ -1,5 +1,10 @@
 import { apiClient, handleApiError } from "./api";
 import type { Contact, ContactType } from "@/interface/contact";
+import type {
+  PaginatedResponse,
+  PaginationParams,
+} from "@/interface/pagination";
+import { createPaginationQueryParams } from "@/lib/pagination-utils";
 
 export interface CreateContactDto {
   personId: string;
@@ -33,6 +38,19 @@ export const contactsService = {
   async findAll(): Promise<Contact[]> {
     try {
       return await apiClient.get<Contact[]>("/contacts");
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async findAllPaginated(
+    params: PaginationParams
+  ): Promise<PaginatedResponse<Contact>> {
+    try {
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<Contact>>(
+        `/contacts?${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }

@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react";
 import { Trash2, Pencil } from "lucide-react";
 import { Button } from "../ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { DataTable } from "../ui/data-table";
 import { ContactType, type Contact } from "@/interface/contact";
 import { Badge } from "../ui/badge";
 import { contactsService } from "@/services/contacts.service";
+import { usePagination } from "@/hooks/usePagination";
+import toast from "react-hot-toast";
+import { handlePaginatedResponse } from "@/lib/pagination-helper";
 
 interface ContactTableProps {
   filter: "ALL" | ContactType;
@@ -23,17 +19,44 @@ export function ContactTable({ filter, onEdit }: ContactTableProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const pagination = usePagination({
+    initialLimit: 10,
+  });
+
   const loadContacts = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data =
-        filter === "ALL"
-          ? await contactsService.findAll()
-          : await contactsService.findByType(filter);
-      setContacts(data);
+
+      // Si hay filtro, usar el método sin paginación (por ahora)
+      // TODO: Implementar filtro con paginación en el backend
+      if (filter !== "ALL") {
+        const data = await contactsService.findByType(filter);
+        setContacts(data || []);
+        // Simular metadata para filtros
+        pagination.updateFromMeta({
+          page: 1,
+          limit: data.length,
+          total: data.length,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        });
+      } else {
+        const rawResponse = await contactsService.findAllPaginated(
+          pagination.paginationParams
+        );
+        const { data, meta } = handlePaginatedResponse<Contact>(
+          rawResponse,
+          pagination.currentPage,
+          pagination.limit
+        );
+        setContacts(data);
+        pagination.updateFromMeta(meta);
+      }
     } catch (err: any) {
       setError(err.message || "Error al cargar contactos");
+      setContacts([]);
     } finally {
       setLoading(false);
     }
@@ -41,16 +64,21 @@ export function ContactTable({ filter, onEdit }: ContactTableProps) {
 
   useEffect(() => {
     loadContacts();
-  }, [filter]);
+  }, [filter, pagination.currentPage, pagination.limit]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Estás seguro de eliminar este contacto?")) return;
 
     try {
       await contactsService.softDelete(id);
+      toast.success("Contacto eliminado exitosamente");
       loadContacts();
     } catch (err: any) {
-      alert(err.message || "Error al eliminar contacto");
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Error al eliminar contacto";
+      toast.error(errorMessage);
     }
   };
 
@@ -70,10 +98,6 @@ export function ContactTable({ filter, onEdit }: ContactTableProps) {
     return <Badge variant={variants[type]}>{labels[type]}</Badge>;
   };
 
-  if (loading) {
-    return <div className="text-center py-8">Cargando contactos...</div>;
-  }
-
   if (error) {
     return (
       <div className="text-center py-8">
@@ -83,57 +107,68 @@ export function ContactTable({ filter, onEdit }: ContactTableProps) {
     );
   }
 
+  const columns = [
+    {
+      key: "fullName",
+      header: "Nombre",
+      accessor: (contact: Contact) => contact.person.fullName,
+    },
+    {
+      key: "email",
+      header: "Email",
+      accessor: (contact: Contact) => contact.person.email,
+    },
+    {
+      key: "phone",
+      header: "Teléfono",
+      accessor: (contact: Contact) => contact.person.phone,
+    },
+    {
+      key: "type",
+      header: "Tipo",
+      render: (contact: Contact) => getContactTypeBadge(contact.type),
+    },
+    {
+      key: "actions",
+      header: "Acciones",
+      render: (contact: Contact) => (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(contact)}
+            title="Editar"
+          >
+            <Pencil className="w-4 h-4 text-blue-600" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(contact.id)}
+            title="Eliminar"
+          >
+            <Trash2 className="w-4 h-4 text-red-600" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Teléfono</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {contacts.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center text-gray-500">
-                No hay contactos para mostrar
-              </TableCell>
-            </TableRow>
-          ) : (
-            contacts.map((contact) => (
-              <TableRow key={contact.id}>
-                <TableCell className="font-medium">
-                  {contact.person.fullName}
-                </TableCell>
-                <TableCell>{contact.person.email}</TableCell>
-                <TableCell>{contact.person.phone}</TableCell>
-                <TableCell>{getContactTypeBadge(contact.type)}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEdit(contact)}
-                    >
-                      <Pencil className="w-4 h-4 text-blue-600" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(contact.id)}
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable
+      data={contacts}
+      columns={columns}
+      currentPage={pagination.currentPage}
+      totalPages={pagination.totalPages}
+      limit={pagination.limit}
+      total={pagination.total}
+      hasNextPage={pagination.hasNextPage}
+      hasPreviousPage={pagination.hasPreviousPage}
+      limitOptions={pagination.limitOptions}
+      onPageChange={pagination.setPage}
+      onLimitChange={pagination.setLimit}
+      isLoading={loading}
+      emptyMessage="No hay contactos para mostrar"
+    />
   );
 }

@@ -1,5 +1,10 @@
 import { apiClient, handleApiError } from "./api";
 import type { Warehouse } from "@/interface/warehouse";
+import type {
+  PaginatedResponse,
+  PaginationParams,
+} from "@/interface/pagination";
+import { createPaginationQueryParams } from "@/lib/pagination-utils";
 
 export interface CreateWarehouseDto {
   name: string;
@@ -17,6 +22,19 @@ export const warehousesService = {
   async findAll(): Promise<Warehouse[]> {
     try {
       return await apiClient.get<Warehouse[]>("/warehouse");
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async findAllPaginated(
+    params: PaginationParams
+  ): Promise<PaginatedResponse<Warehouse>> {
+    try {
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<Warehouse>>(
+        `/warehouse?${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }

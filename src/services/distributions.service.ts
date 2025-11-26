@@ -1,5 +1,10 @@
 import { apiClient, handleApiError } from "./api";
 import type { Distribution } from "@/interface/distribution";
+import type {
+  PaginatedResponse,
+  PaginationParams,
+} from "@/interface/pagination";
+import { createPaginationQueryParams } from "@/lib/pagination-utils";
 
 export interface CreateDistributionDto {
   originWarehouseId: string;
@@ -21,6 +26,19 @@ export const distributionsService = {
   async findAll(): Promise<Distribution[]> {
     try {
       return await apiClient.get<Distribution[]>("/distribution");
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
+  async findAllPaginated(
+    params: PaginationParams
+  ): Promise<PaginatedResponse<Distribution>> {
+    try {
+      const queryString = createPaginationQueryParams(params);
+      return await apiClient.get<PaginatedResponse<Distribution>>(
+        `/distribution?${queryString}`
+      );
     } catch (error) {
       handleApiError(error);
     }
