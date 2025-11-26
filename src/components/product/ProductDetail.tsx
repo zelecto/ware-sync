@@ -19,7 +19,13 @@ interface ProductDetailProps {
 export function ProductDetail({ product }: ProductDetailProps) {
   const totalStock =
     product.warehouses?.reduce((acc, w) => acc + w.quantity, 0) ?? 0;
-  const isLowStock = !!(product.minStock && totalStock < product.minStock);
+
+  const warehousesWithLowStock =
+    product.warehouses?.filter(
+      (w) => product.minStock !== undefined && w.quantity < product.minStock
+    ) ?? [];
+
+  const hasLowStockInWarehouses = warehousesWithLowStock.length > 0;
 
   return (
     <div className="">
@@ -72,7 +78,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                   icon={<Warehouse className="w-4 h-4" />}
                   label="Stock total"
                   value={totalStock.toString()}
-                  alert={isLowStock}
+                  alert={hasLowStockInWarehouses}
                 />
               </div>
 
@@ -97,42 +103,67 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </CardHeader>
             <CardContent>
               <div className="grid gap-3">
-                {product.warehouses.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {item.warehouse.name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {item.warehouse.city} • {item.warehouse.address}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-semibold text-foreground">
-                        {item.quantity}
-                      </p>
-                      <p className="text-xs text-muted-foreground">unidades</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                {product.warehouses.map((item) => {
+                  const isLowStockInWarehouse =
+                    product.minStock !== undefined &&
+                    item.quantity < product.minStock;
 
-        {/* Low Stock Alert */}
-        {isLowStock && (
-          <Card className="border-amber-200 bg-amber-50">
-            <CardContent className="flex items-center gap-3 py-4">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
-              <p className="text-sm text-amber-800">
-                <span className="font-medium">Stock bajo:</span> El inventario
-                actual ({totalStock}) está por debajo del mínimo requerido (
-                {product.minStock}).
-              </p>
+                  return (
+                    <div
+                      key={item.id}
+                      className={`p-4 rounded-lg border ${
+                        isLowStockInWarehouse
+                          ? "bg-amber-50 border-amber-200"
+                          : "bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-foreground">
+                              {item.warehouse.name}
+                            </p>
+                            {isLowStockInWarehouse && (
+                              <AlertTriangle className="w-4 h-4 text-amber-600" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {item.warehouse.city} • {item.warehouse.address}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={`text-xl font-semibold ${
+                              isLowStockInWarehouse
+                                ? "text-amber-600"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {item.quantity}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            unidades
+                          </p>
+                        </div>
+                      </div>
+                      {isLowStockInWarehouse && (
+                        <div className="mt-3 pt-3 border-t border-amber-200">
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                            <p className="text-xs text-amber-800">
+                              <span className="font-semibold">Stock bajo:</span>{" "}
+                              El inventario actual está por debajo del mínimo
+                              requerido ({product.minStock}). Se necesitan al
+                              menos {product.minStock! - item.quantity} unidades
+                              más.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
         )}
