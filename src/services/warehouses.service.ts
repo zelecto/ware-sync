@@ -5,6 +5,11 @@ import type {
   PaginationParams,
 } from "@/interface/pagination";
 import { createPaginationQueryParams } from "@/lib/pagination-utils";
+import {
+  QueryStringBuilder,
+  WarehouseFilterConfig,
+  type FilterParams,
+} from "@/lib/filters";
 
 export interface CreateWarehouseDto {
   name: string;
@@ -18,12 +23,24 @@ export interface UpdateWarehouseDto {
   address?: string;
 }
 
+const warehouseFilterConfig = new WarehouseFilterConfig();
+
 export const warehousesService = {
-  async findAllPaginated(
-    params: PaginationParams
+  async findAll(
+    params: PaginationParams | FilterParams
   ): Promise<PaginatedResponse<Warehouse>> {
     try {
-      const queryString = createPaginationQueryParams(params);
+      let queryString: string;
+
+      if ("filters" in params || "search" in params || "sortBy" in params) {
+        queryString = QueryStringBuilder.fromFilterParams(
+          params as FilterParams,
+          warehouseFilterConfig
+        );
+      } else {
+        queryString = createPaginationQueryParams(params as PaginationParams);
+      }
+
       return await apiClient.get<PaginatedResponse<Warehouse>>(
         `/warehouse?${queryString}`
       );

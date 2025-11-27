@@ -63,7 +63,7 @@ export function ProductForm({
   useEffect(() => {
     const loadWarehouses = async () => {
       try {
-        const response = await warehousesService.findAllPaginated({
+        const response = await warehousesService.findAll({
           page: 1,
           limit: 50,
         });

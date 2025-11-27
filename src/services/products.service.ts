@@ -5,6 +5,11 @@ import type {
   PaginationParams,
 } from "@/interface/pagination";
 import { createPaginationQueryParams } from "@/lib/pagination-utils";
+import {
+  QueryStringBuilder,
+  ProductFilterConfig,
+  type FilterParams,
+} from "@/lib/filters";
 
 export interface CreateProductDto {
   sku: string;
@@ -36,12 +41,24 @@ export interface UpdateProductDto {
   }>;
 }
 
+const productFilterConfig = new ProductFilterConfig();
+
 export const productsService = {
-  async findAllPaginated(
-    params: PaginationParams
+  async findAll(
+    params: PaginationParams | FilterParams
   ): Promise<PaginatedResponse<Product>> {
     try {
-      const queryString = createPaginationQueryParams(params);
+      let queryString: string;
+
+      if ("filters" in params || "search" in params || "sortBy" in params) {
+        queryString = QueryStringBuilder.fromFilterParams(
+          params as FilterParams,
+          productFilterConfig
+        );
+      } else {
+        queryString = createPaginationQueryParams(params as PaginationParams);
+      }
+
       return await apiClient.get<PaginatedResponse<Product>>(
         `/product?${queryString}`
       );

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ContactType } from "@/interface/contact";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ContactTable } from "@/components/contact";
 import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui";
@@ -17,8 +18,8 @@ import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 export default function Contacts() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<"ALL" | ContactType>("ALL");
+  const [searchInput, setSearchInput] = useState("");
 
-  // Actualizar breadcrumb
   useBreadcrumbItem("Contactos");
 
   const handleEdit = (contact: any) => {
@@ -37,7 +38,15 @@ export default function Contacts() {
 
       <Card>
         <CardHeader>
-          <div className="flex justify-end w-full">
+          <div className="flex justify-between items-center gap-4 w-full">
+            <div className="relative flex-1 max-w-lg">
+              <Input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Buscar por nombre, cédula, email o teléfono..."
+              />
+            </div>
             <Select
               value={filter}
               onValueChange={(value) => setFilter(value as "ALL" | ContactType)}
@@ -55,7 +64,12 @@ export default function Contacts() {
           </div>
         </CardHeader>
         <CardContent>
-          <ContactTable filter={filter} onEdit={handleEdit} />
+          <ContactTable
+            filter={filter}
+            onEdit={handleEdit}
+            searchInput={searchInput}
+            onSearchChange={setSearchInput}
+          />
         </CardContent>
       </Card>
     </div>

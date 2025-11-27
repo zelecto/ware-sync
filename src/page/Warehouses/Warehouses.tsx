@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { WarehouseTable } from "@/components/warehouse";
 import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui";
@@ -7,8 +9,8 @@ import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function Warehouses() {
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState("");
 
-  // Actualizar breadcrumb
   useBreadcrumbItem("Almacenes");
 
   const handleEdit = (warehouse: any) => {
@@ -27,10 +29,23 @@ export default function Warehouses() {
 
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold">Lista de Almacenes</h2>
+          <div className="flex justify-between items-center gap-4 w-full">
+            <div className="relative flex-1 max-w-lg">
+              <Input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Buscar por nombre, ciudad o dirección..."
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <WarehouseTable onEdit={handleEdit} />
+          <WarehouseTable
+            onEdit={handleEdit}
+            searchInput={searchInput}
+            onSearchChange={setSearchInput}
+          />
         </CardContent>
       </Card>
     </div>

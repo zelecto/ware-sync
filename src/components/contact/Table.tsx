@@ -5,44 +5,65 @@ import { DataTable } from "../ui/data-table";
 import { ContactType, type Contact } from "@/interface/contact";
 import { Badge } from "../ui/badge";
 import { contactsService } from "@/services/contacts.service";
-import { usePagination } from "@/hooks/usePagination";
+import { useFilters } from "@/hooks/useFilters";
+import { FilterUtils } from "@/lib/filters";
 import toast from "react-hot-toast";
-import { handlePaginatedResponse } from "@/lib/pagination-helper";
 
 interface ContactTableProps {
   filter: "ALL" | ContactType;
   onEdit: (contact: Contact) => void;
+  searchInput: string;
+  onSearchChange: (value: string) => void;
 }
 
-export function ContactTable({ filter, onEdit }: ContactTableProps) {
+export function ContactTable({
+  filter,
+  onEdit,
+  searchInput,
+  onSearchChange,
+}: ContactTableProps) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [meta, setMeta] = useState<any>(null);
 
-  const pagination = usePagination({
-    initialLimit: 10,
+  const {
+    filterParams,
+    updateSearch,
+    updatePage,
+    updateLimit,
+    addFilter,
+    removeFilter,
+    page,
+    limit,
+  } = useFilters({
+    page: 1,
+    limit: 10,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateSearch(searchInput);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput, updateSearch]);
+
+  useEffect(() => {
+    removeFilter("type");
+    if (filter !== "ALL") {
+      addFilter(FilterUtils.equals("type", filter));
+    }
+  }, [filter]);
 
   const loadContacts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const rawResponse =
-        filter !== "ALL"
-          ? await contactsService.findByTypePaginated(
-              filter,
-              pagination.paginationParams
-            )
-          : await contactsService.findAllPaginated(pagination.paginationParams);
+      const response = await contactsService.findAll(filterParams);
 
-      const { data, meta } = handlePaginatedResponse<Contact>(
-        rawResponse,
-        pagination.currentPage,
-        pagination.limit
-      );
-      setContacts(data);
-      pagination.updateFromMeta(meta);
+      setContacts(response.data);
+      setMeta(response.meta);
     } catch (err: any) {
       setError(err.message || "Error al cargar contactos");
       setContacts([]);
@@ -53,7 +74,7 @@ export function ContactTable({ filter, onEdit }: ContactTableProps) {
 
   useEffect(() => {
     loadContacts();
-  }, [filter, pagination.currentPage, pagination.limit]);
+  }, [filterParams]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Estás seguro de eliminar este contacto?")) return;
@@ -147,17 +168,21 @@ export function ContactTable({ filter, onEdit }: ContactTableProps) {
     <DataTable
       data={contacts}
       columns={columns}
-      currentPage={pagination.currentPage}
-      totalPages={pagination.totalPages}
-      limit={pagination.limit}
-      total={pagination.total}
-      hasNextPage={pagination.hasNextPage}
-      hasPreviousPage={pagination.hasPreviousPage}
-      limitOptions={pagination.limitOptions}
-      onPageChange={pagination.setPage}
-      onLimitChange={pagination.setLimit}
+      currentPage={page}
+      totalPages={meta?.totalPages || 0}
+      limit={limit}
+      total={meta?.total || 0}
+      hasNextPage={meta?.hasNextPage || false}
+      hasPreviousPage={meta?.hasPreviousPage || false}
+      limitOptions={[5, 10, 25, 50]}
+      onPageChange={updatePage}
+      onLimitChange={updateLimit}
       isLoading={loading}
-      emptyMessage="No hay contactos para mostrar"
+      emptyMessage={
+        searchInput
+          ? "No se encontraron contactos con ese criterio de búsqueda"
+          : "No hay contactos para mostrar"
+      }
     />
   );
 }

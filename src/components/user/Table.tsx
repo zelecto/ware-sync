@@ -1,48 +1,73 @@
 import { useEffect, useState } from "react";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, Search } from "lucide-react";
 import { Button } from "../ui/button";
 import { DataTable } from "../ui/data-table";
 import { UserRole, type User } from "@/interface/user";
 import { Badge } from "../ui/badge";
 import { usersService } from "@/services/users.service";
-import { usePagination } from "@/hooks/usePagination";
+import { useFilters } from "@/hooks/useFilters";
+import { FilterUtils } from "@/lib/filters";
 import toast from "react-hot-toast";
-import { handlePaginatedResponse } from "@/lib/pagination-helper";
 
 interface UserTableProps {
   filter: "ALL" | UserRole;
   onEdit: (user: User) => void;
 }
 
-export function UserTable({ filter, onEdit }: UserTableProps) {
+interface UserTableInternalProps extends UserTableProps {
+  searchInput: string;
+  onSearchChange: (value: string) => void;
+}
+
+export function UserTable({
+  filter,
+  onEdit,
+  searchInput,
+  onSearchChange,
+}: UserTableInternalProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [meta, setMeta] = useState<any>(null);
 
-  const pagination = usePagination({
-    initialLimit: 10,
+  const {
+    filterParams,
+    updateSearch,
+    updatePage,
+    updateLimit,
+    addFilter,
+    removeFilter,
+    page,
+    limit,
+  } = useFilters({
+    page: 1,
+    limit: 10,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateSearch(searchInput);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    removeFilter("role");
+    if (filter !== "ALL") {
+      addFilter(FilterUtils.equals("role", filter));
+    }
+  }, [filter]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const rawResponse =
-        filter !== "ALL"
-          ? await usersService.findByRolePaginated(
-              filter,
-              pagination.paginationParams
-            )
-          : await usersService.findAllPaginated(pagination.paginationParams);
+      const response = await usersService.findAll(filterParams);
 
-      const { data, meta } = handlePaginatedResponse<User>(
-        rawResponse,
-        pagination.currentPage,
-        pagination.limit
-      );
-      setUsers(data);
-      pagination.updateFromMeta(meta);
+      setUsers(response.data);
+      setMeta(response.meta);
     } catch (err: any) {
       setError(err.message || "Error al cargar usuarios");
       setUsers([]);
@@ -53,7 +78,7 @@ export function UserTable({ filter, onEdit }: UserTableProps) {
 
   useEffect(() => {
     loadUsers();
-  }, [filter, pagination.currentPage, pagination.limit]);
+  }, [filterParams]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
@@ -135,17 +160,21 @@ export function UserTable({ filter, onEdit }: UserTableProps) {
     <DataTable
       data={users}
       columns={columns}
-      currentPage={pagination.currentPage}
-      totalPages={pagination.totalPages}
-      limit={pagination.limit}
-      total={pagination.total}
-      hasNextPage={pagination.hasNextPage}
-      hasPreviousPage={pagination.hasPreviousPage}
-      limitOptions={pagination.limitOptions}
-      onPageChange={pagination.setPage}
-      onLimitChange={pagination.setLimit}
+      currentPage={page}
+      totalPages={meta?.totalPages || 0}
+      limit={limit}
+      total={meta?.total || 0}
+      hasNextPage={meta?.hasNextPage || false}
+      hasPreviousPage={meta?.hasPreviousPage || false}
+      limitOptions={[5, 10, 25, 50]}
+      onPageChange={updatePage}
+      onLimitChange={updateLimit}
       isLoading={loading}
-      emptyMessage="No hay usuarios para mostrar"
+      emptyMessage={
+        searchInput
+          ? "No se encontraron usuarios con ese criterio de búsqueda"
+          : "No hay usuarios para mostrar"
+      }
     />
   );
 }

@@ -5,6 +5,11 @@ import type {
   PaginationParams,
 } from "@/interface/pagination";
 import { createPaginationQueryParams } from "@/lib/pagination-utils";
+import {
+  QueryStringBuilder,
+  UserFilterConfig,
+  type FilterParams,
+} from "@/lib/filters";
 
 export interface CreateUserDto {
   personId: string;
@@ -37,12 +42,31 @@ export interface UpdateUserWithPersonDto {
   role: UserRole;
 }
 
+// Configuración de filtros para usuarios
+const userFilterConfig = new UserFilterConfig();
+
 export const usersService = {
-  async findAllPaginated(
-    params: PaginationParams
+  /**
+   * Obtiene usuarios con filtros, búsqueda, ordenamiento y paginación
+   * Método principal que soporta tanto paginación simple como filtros avanzados
+   */
+  async findAll(
+    params: PaginationParams | FilterParams
   ): Promise<PaginatedResponse<User>> {
     try {
-      const queryString = createPaginationQueryParams(params);
+      let queryString: string;
+
+      // Si tiene filtros, usar QueryStringBuilder
+      if ("filters" in params || "search" in params || "sortBy" in params) {
+        queryString = QueryStringBuilder.fromFilterParams(
+          params as FilterParams,
+          userFilterConfig
+        );
+      } else {
+        // Paginación simple
+        queryString = createPaginationQueryParams(params as PaginationParams);
+      }
+
       return await apiClient.get<PaginatedResponse<User>>(
         `/users?${queryString}`
       );

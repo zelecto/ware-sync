@@ -5,36 +5,46 @@ import { Button } from "../ui/button";
 import { DataTable } from "../ui/data-table";
 import type { Warehouse } from "@/interface/warehouse";
 import { warehousesService } from "@/services/warehouses.service";
-import { usePagination } from "@/hooks/usePagination";
-import { handlePaginatedResponse } from "@/lib/pagination-helper";
+import { useFilters } from "@/hooks/useFilters";
 
 interface WarehouseTableProps {
   onEdit: (warehouse: Warehouse) => void;
+  searchInput: string;
+  onSearchChange: (value: string) => void;
 }
 
-export function WarehouseTable({ onEdit }: WarehouseTableProps) {
+export function WarehouseTable({
+  onEdit,
+  searchInput,
+  onSearchChange,
+}: WarehouseTableProps) {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [meta, setMeta] = useState<any>(null);
 
-  const pagination = usePagination({
-    initialLimit: 10,
-  });
+  const { filterParams, updateSearch, updatePage, updateLimit, page, limit } =
+    useFilters({
+      page: 1,
+      limit: 10,
+    });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateSearch(searchInput);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput, updateSearch]);
 
   const loadWarehouses = async () => {
     try {
       setLoading(true);
       setError(null);
-      const rawResponse = await warehousesService.findAllPaginated(
-        pagination.paginationParams
-      );
-      const { data, meta } = handlePaginatedResponse<Warehouse>(
-        rawResponse,
-        pagination.currentPage,
-        pagination.limit
-      );
-      setWarehouses(data);
-      pagination.updateFromMeta(meta);
+
+      const response = await warehousesService.findAll(filterParams);
+
+      setWarehouses(response.data);
+      setMeta(response.meta);
     } catch (err: any) {
       setError(err.message || "Error al cargar almacenes");
       setWarehouses([]);
@@ -45,7 +55,7 @@ export function WarehouseTable({ onEdit }: WarehouseTableProps) {
 
   useEffect(() => {
     loadWarehouses();
-  }, [pagination.currentPage, pagination.limit]);
+  }, [filterParams]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Estás seguro de eliminar este almacén?")) return;
@@ -115,17 +125,21 @@ export function WarehouseTable({ onEdit }: WarehouseTableProps) {
     <DataTable
       data={warehouses}
       columns={columns}
-      currentPage={pagination.currentPage}
-      totalPages={pagination.totalPages}
-      limit={pagination.limit}
-      total={pagination.total}
-      hasNextPage={pagination.hasNextPage}
-      hasPreviousPage={pagination.hasPreviousPage}
-      limitOptions={pagination.limitOptions}
-      onPageChange={pagination.setPage}
-      onLimitChange={pagination.setLimit}
+      currentPage={page}
+      totalPages={meta?.totalPages || 0}
+      limit={limit}
+      total={meta?.total || 0}
+      hasNextPage={meta?.hasNextPage || false}
+      hasPreviousPage={meta?.hasPreviousPage || false}
+      limitOptions={[5, 10, 25, 50]}
+      onPageChange={updatePage}
+      onLimitChange={updateLimit}
       isLoading={loading}
-      emptyMessage="No hay almacenes registrados"
+      emptyMessage={
+        searchInput
+          ? "No se encontraron almacenes con ese criterio de búsqueda"
+          : "No hay almacenes registrados"
+      }
     />
   );
 }

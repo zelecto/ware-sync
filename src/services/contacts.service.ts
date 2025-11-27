@@ -5,6 +5,11 @@ import type {
   PaginationParams,
 } from "@/interface/pagination";
 import { createPaginationQueryParams } from "@/lib/pagination-utils";
+import {
+  QueryStringBuilder,
+  ContactFilterConfig,
+  type FilterParams,
+} from "@/lib/filters";
 
 export interface CreateContactDto {
   personId: string;
@@ -34,12 +39,24 @@ export interface UpdateContactWithPersonDto {
   type: ContactType;
 }
 
+const contactFilterConfig = new ContactFilterConfig();
+
 export const contactsService = {
-  async findAllPaginated(
-    params: PaginationParams
+  async findAll(
+    params: PaginationParams | FilterParams
   ): Promise<PaginatedResponse<Contact>> {
     try {
-      const queryString = createPaginationQueryParams(params);
+      let queryString: string;
+
+      if ("filters" in params || "search" in params || "sortBy" in params) {
+        queryString = QueryStringBuilder.fromFilterParams(
+          params as FilterParams,
+          contactFilterConfig
+        );
+      } else {
+        queryString = createPaginationQueryParams(params as PaginationParams);
+      }
+
       return await apiClient.get<PaginatedResponse<Contact>>(
         `/contacts?${queryString}`
       );

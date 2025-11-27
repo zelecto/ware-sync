@@ -4,7 +4,7 @@ import type { UserRole } from "@/interface/user";
 import { Button } from "@/components/ui/button";
 import { UserTable } from "@/components/user";
 import { Plus } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui";
+import { Card, CardContent, CardHeader, Input } from "@/components/ui";
 import {
   Select,
   SelectContent,
@@ -18,8 +18,8 @@ import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 export default function Index() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<"ALL" | UserRole>("ALL");
+  const [searchInput, setSearchInput] = useState("");
 
-  // Actualizar breadcrumb
   useBreadcrumbItem("Usuarios");
 
   const handleEdit = (user: any) => {
@@ -38,7 +38,18 @@ export default function Index() {
 
       <Card>
         <CardHeader>
-          <div className="flex justify-end w-full">
+          <div className="flex justify-between items-center gap-4 w-full">
+            {/* Buscador */}
+            <div className="relative flex-1 max-w-lg">
+              <Input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Buscar por nombre, cédula, email o teléfono..."
+              />
+            </div>
+
+            {/* Filtro por rol */}
             <Select
               value={filter}
               onValueChange={(value) => setFilter(value as "ALL" | UserRole)}
@@ -57,7 +68,12 @@ export default function Index() {
           </div>
         </CardHeader>
         <CardContent>
-          <UserTable filter={filter} onEdit={handleEdit} />
+          <UserTable
+            filter={filter}
+            onEdit={handleEdit}
+            searchInput={searchInput}
+            onSearchChange={setSearchInput}
+          />
         </CardContent>
       </Card>
     </div>

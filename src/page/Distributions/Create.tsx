@@ -25,9 +25,9 @@ export default function CreateDistribution() {
         setDataLoading(true);
         const [warehousesResponse, contactsResponse, productsResponse] =
           await Promise.all([
-            warehousesService.findAllPaginated({ page: 1, limit: 50 }),
-            contactsService.findAllPaginated({ page: 1, limit: 50 }),
-            productsService.findAllPaginated({ page: 1, limit: 50 }),
+            warehousesService.findAll({ page: 1, limit: 50 }),
+            contactsService.findAll({ page: 1, limit: 50 }),
+            productsService.findAll({ page: 1, limit: 50 }),
           ]);
         setWarehouses(warehousesResponse.data);
         setContacts(contactsResponse.data);

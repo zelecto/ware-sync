@@ -7,37 +7,47 @@ import { DataTable } from "../ui/data-table";
 import type { Product } from "@/interface/product";
 import { Badge } from "../ui/badge";
 import { productsService } from "@/services/products.service";
-import { usePagination } from "@/hooks/usePagination";
-import { handlePaginatedResponse } from "@/lib/pagination-helper";
+import { useFilters } from "@/hooks/useFilters";
 
 interface ProductTableProps {
   onEdit: (product: Product) => void;
+  searchInput: string;
+  onSearchChange: (value: string) => void;
 }
 
-export function ProductTable({ onEdit }: ProductTableProps) {
+export function ProductTable({
+  onEdit,
+  searchInput,
+  onSearchChange,
+}: ProductTableProps) {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [meta, setMeta] = useState<any>(null);
 
-  const pagination = usePagination({
-    initialLimit: 10,
-  });
+  const { filterParams, updateSearch, updatePage, updateLimit, page, limit } =
+    useFilters({
+      page: 1,
+      limit: 10,
+    });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateSearch(searchInput);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput, updateSearch]);
 
   const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
-      const rawResponse = await productsService.findAllPaginated(
-        pagination.paginationParams
-      );
-      const { data, meta } = handlePaginatedResponse<Product>(
-        rawResponse,
-        pagination.currentPage,
-        pagination.limit
-      );
-      setProducts(data);
-      pagination.updateFromMeta(meta);
+
+      const response = await productsService.findAll(filterParams);
+
+      setProducts(response.data);
+      setMeta(response.meta);
     } catch (err: any) {
       setError(err.message || "Error al cargar productos");
       setProducts([]);
@@ -48,7 +58,7 @@ export function ProductTable({ onEdit }: ProductTableProps) {
 
   useEffect(() => {
     loadProducts();
-  }, [pagination.currentPage, pagination.limit]);
+  }, [filterParams]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Estás seguro de eliminar este producto?")) return;
@@ -152,17 +162,21 @@ export function ProductTable({ onEdit }: ProductTableProps) {
     <DataTable
       data={products}
       columns={columns}
-      currentPage={pagination.currentPage}
-      totalPages={pagination.totalPages}
-      limit={pagination.limit}
-      total={pagination.total}
-      hasNextPage={pagination.hasNextPage}
-      hasPreviousPage={pagination.hasPreviousPage}
-      limitOptions={pagination.limitOptions}
-      onPageChange={pagination.setPage}
-      onLimitChange={pagination.setLimit}
+      currentPage={page}
+      totalPages={meta?.totalPages || 0}
+      limit={limit}
+      total={meta?.total || 0}
+      hasNextPage={meta?.hasNextPage || false}
+      hasPreviousPage={meta?.hasPreviousPage || false}
+      limitOptions={[5, 10, 25, 50]}
+      onPageChange={updatePage}
+      onLimitChange={updateLimit}
       isLoading={loading}
-      emptyMessage="No hay productos registrados"
+      emptyMessage={
+        searchInput
+          ? "No se encontraron productos con ese criterio de búsqueda"
+          : "No hay productos registrados"
+      }
     />
   );
 }
