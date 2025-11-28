@@ -78,7 +78,6 @@ export function ProductDetail({ product }: ProductDetailProps) {
                   icon={<Warehouse className="w-4 h-4" />}
                   label="Stock total"
                   value={totalStock.toString()}
-                  alert={hasLowStockInWarehouses}
                 />
               </div>
 

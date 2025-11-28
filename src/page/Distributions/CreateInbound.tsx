@@ -19,6 +19,12 @@ export default function CreateSupplierInbound() {
   const [suppliers, setSuppliers] = useState<Contact[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [preselectedProductId, setPreselectedProductId] = useState<
+    string | null
+  >(null);
+  const [preselectedWarehouseId, setPreselectedWarehouseId] = useState<
+    string | null
+  >(null);
 
   useBreadcrumbItem("Crear Entrada");
 
@@ -35,6 +41,29 @@ export default function CreateSupplierInbound() {
         setWarehouses(warehousesResponse.data);
         setSuppliers(suppliersResponse.data);
         setProducts(productsResponse.data);
+
+        // Leer parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Buscar producto por SKU
+        const sku = urlParams.get("sku");
+        if (sku && productsResponse.data.length > 0) {
+          const product = productsResponse.data.find((p) => p.sku === sku);
+          if (product) {
+            setPreselectedProductId(product.id);
+          }
+        }
+
+        // Buscar bodega por nombre
+        const warehouseName = urlParams.get("warehouse");
+        if (warehouseName && warehousesResponse.data.length > 0) {
+          const warehouse = warehousesResponse.data.find(
+            (w) => w.name === warehouseName
+          );
+          if (warehouse) {
+            setPreselectedWarehouseId(warehouse.id);
+          }
+        }
       } catch (error: any) {
         toast.error("Error al cargar los datos");
       } finally {
@@ -89,6 +118,8 @@ export default function CreateSupplierInbound() {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         loading={loading}
+        preselectedProductId={preselectedProductId}
+        preselectedWarehouseId={preselectedWarehouseId}
       />
     </div>
   );

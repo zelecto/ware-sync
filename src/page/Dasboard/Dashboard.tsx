@@ -12,9 +12,14 @@ import {
   AlertTriangle,
   ArrowRightLeft,
   Loader2,
+  ArrowDownToLine,
+  Plus,
+  ExternalLink,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   dashboardService,
   type DashboardData,
@@ -22,6 +27,7 @@ import {
 import { getUnitLabel } from "@/lib/unit-labels";
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
@@ -84,6 +90,13 @@ export default function DashboardPage() {
                 Sistema de Gestión de Inventario
               </p>
             </div>
+            <Button
+              onClick={() => navigate("/distributions/inbound/create")}
+              className="flex items-center gap-2"
+            >
+              <ArrowDownToLine className="h-4 w-4" />
+              Nueva Entrada
+            </Button>
           </div>
         </div>
       </header>
@@ -264,7 +277,8 @@ export default function DashboardPage() {
               Productos con Stock Crítico
             </CardTitle>
             <CardDescription>
-              Productos por debajo del stock mínimo
+              Productos por debajo del stock mínimo. Click para crear entrada de
+              inventario.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -272,7 +286,16 @@ export default function DashboardPage() {
               {dashboardData.criticalStock.map((item) => (
                 <div
                   key={item.sku}
-                  className="flex items-center justify-between rounded-lg border border-border p-3"
+                  onClick={() => {
+                    const url = `/distributions/inbound/create?sku=${encodeURIComponent(
+                      item.sku
+                    )}&warehouse=${encodeURIComponent(item.warehouse)}`;
+                    window.open(url, "_blank", "noopener,noreferrer");
+                    // Mantener el foco en la pestaña actual
+                    window.focus();
+                  }}
+                  className="flex items-center justify-between rounded-lg border border-border p-3 cursor-pointer hover:bg-muted/50 hover:border-destructive/50 transition-colors"
+                  title="Click para crear entrada de inventario"
                 >
                   <div className="flex-1">
                     <div className="font-medium text-sm">{item.name}</div>
@@ -302,6 +325,7 @@ export default function DashboardPage() {
                     <Badge variant="destructive" className="font-normal">
                       Crítico
                     </Badge>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
               ))}

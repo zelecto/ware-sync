@@ -19,7 +19,7 @@ export default function Distributions() {
   const [loading, setLoading] = useState(true);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
-    type: "complete" | "cancel" | "delete" | null;
+    type: "complete" | "cancel" | null;
     distributionId: string | null;
   }>({ open: false, type: null, distributionId: null });
 
@@ -40,7 +40,6 @@ export default function Distributions() {
         pagination.currentPage,
         pagination.limit
       );
-      // Filtrar solo transferencias entre bodegas
       const warehouseTransfers = data.filter(
         (d) => d.type === DistributionType.WAREHOUSE_TRANSFER
       );
@@ -70,10 +69,6 @@ export default function Distributions() {
     setConfirmDialog({ open: true, type: "cancel", distributionId: id });
   };
 
-  const handleDelete = (id: string) => {
-    setConfirmDialog({ open: true, type: "delete", distributionId: id });
-  };
-
   const handleConfirmAction = async () => {
     if (!confirmDialog.distributionId) return;
 
@@ -84,9 +79,6 @@ export default function Distributions() {
       } else if (confirmDialog.type === "cancel") {
         await distributionsService.cancel(confirmDialog.distributionId);
         toast.success("Transferencia cancelada exitosamente");
-      } else if (confirmDialog.type === "delete") {
-        await distributionsService.remove(confirmDialog.distributionId);
-        toast.success("Transferencia eliminada exitosamente");
       }
       loadDistributions();
     } catch (error: any) {
@@ -94,11 +86,7 @@ export default function Distributions() {
         error.response?.data?.message ||
         error.message ||
         `Error al ${
-          confirmDialog.type === "complete"
-            ? "completar"
-            : confirmDialog.type === "cancel"
-            ? "cancelar"
-            : "eliminar"
+          confirmDialog.type === "complete" ? "completar" : "cancelar"
         } la transferencia`;
       toast.error(errorMessage);
     }
@@ -120,14 +108,6 @@ export default function Distributions() {
           description:
             "¿Está seguro de cancelar esta transferencia? Esta acción devolverá el stock a la bodega de origen.",
           confirmText: "Cancelar Transferencia",
-          variant: "destructive" as const,
-        };
-      case "delete":
-        return {
-          title: "Eliminar Transferencia",
-          description:
-            "¿Está seguro de eliminar esta transferencia? Esta acción no se puede deshacer.",
-          confirmText: "Eliminar",
           variant: "destructive" as const,
         };
       default:
@@ -169,7 +149,6 @@ export default function Distributions() {
                 onView={handleView}
                 onComplete={handleComplete}
                 onCancel={handleCancel}
-                onDelete={handleDelete}
               />
               {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between">

@@ -15,7 +15,6 @@ export default function ShowProduct() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Actualizar breadcrumb con el nombre del producto
   useBreadcrumbItem(product?.name || "Detalle");
 
   useEffect(() => {

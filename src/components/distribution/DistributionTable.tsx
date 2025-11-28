@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Distribution } from "@/interface/distribution";
 import { DistributionStatus } from "@/interface/distribution";
-import { Eye, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { Eye, CheckCircle, XCircle } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
 
 interface DistributionTableProps {
@@ -18,7 +18,6 @@ interface DistributionTableProps {
   onView: (id: string) => void;
   onComplete: (id: string) => void;
   onCancel: (id: string) => void;
-  onDelete: (id: string) => void;
 }
 
 const statusConfig: Record<
@@ -45,7 +44,6 @@ export function DistributionTable({
   onView,
   onComplete,
   onCancel,
-  onDelete,
 }: DistributionTableProps) {
   return (
     <div className="rounded-md border">
@@ -159,16 +157,6 @@ export function DistributionTable({
                             <XCircle className="h-4 w-4 text-orange-600" />
                           </Button>
                         </>
-                      )}
-                      {distribution.status !== DistributionStatus.COMPLETED && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onDelete(distribution.id)}
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
                       )}
                     </div>
                   </TableCell>

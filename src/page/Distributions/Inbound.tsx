@@ -19,7 +19,7 @@ export default function SupplierInbound() {
   const [loading, setLoading] = useState(true);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
-    type: "complete" | "cancel" | "delete" | null;
+    type: "complete" | "cancel" | null;
     distributionId: string | null;
   }>({ open: false, type: null, distributionId: null });
 
@@ -40,7 +40,6 @@ export default function SupplierInbound() {
         pagination.currentPage,
         pagination.limit
       );
-      // Filtrar solo entradas desde proveedores
       const supplierInbounds = data.filter(
         (d) => d.type === DistributionType.SUPPLIER_INBOUND
       );
@@ -70,10 +69,6 @@ export default function SupplierInbound() {
     setConfirmDialog({ open: true, type: "cancel", distributionId: id });
   };
 
-  const handleDelete = (id: string) => {
-    setConfirmDialog({ open: true, type: "delete", distributionId: id });
-  };
-
   const handleConfirmAction = async () => {
     if (!confirmDialog.distributionId) return;
 
@@ -84,9 +79,6 @@ export default function SupplierInbound() {
       } else if (confirmDialog.type === "cancel") {
         await distributionsService.cancel(confirmDialog.distributionId);
         toast.success("Entrada cancelada exitosamente");
-      } else if (confirmDialog.type === "delete") {
-        await distributionsService.remove(confirmDialog.distributionId);
-        toast.success("Entrada eliminada exitosamente");
       }
       loadDistributions();
     } catch (error: any) {
@@ -94,11 +86,7 @@ export default function SupplierInbound() {
         error.response?.data?.message ||
         error.message ||
         `Error al ${
-          confirmDialog.type === "complete"
-            ? "completar"
-            : confirmDialog.type === "cancel"
-            ? "cancelar"
-            : "eliminar"
+          confirmDialog.type === "complete" ? "completar" : "cancelar"
         } la entrada`;
       toast.error(errorMessage);
     }
@@ -120,14 +108,6 @@ export default function SupplierInbound() {
           description:
             "¿Está seguro de cancelar esta entrada? Solo cambiará el estado, no afecta el inventario.",
           confirmText: "Cancelar Entrada",
-          variant: "destructive" as const,
-        };
-      case "delete":
-        return {
-          title: "Eliminar Entrada",
-          description:
-            "¿Está seguro de eliminar esta entrada? Esta acción no se puede deshacer.",
-          confirmText: "Eliminar",
           variant: "destructive" as const,
         };
       default:
@@ -169,7 +149,6 @@ export default function SupplierInbound() {
                 onView={handleView}
                 onComplete={handleComplete}
                 onCancel={handleCancel}
-                onDelete={handleDelete}
               />
               {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between">

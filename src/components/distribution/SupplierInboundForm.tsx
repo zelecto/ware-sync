@@ -18,7 +18,7 @@ import type { Product } from "@/interface/product";
 import { Trash2, Plus } from "lucide-react";
 
 const supplierInboundSchema = z.object({
-  contactId: z.string().min(1, "El proveedor es requerido"),
+  supplierId: z.string().min(1, "El proveedor es requerido"),
   destinationWarehouseId: z
     .string()
     .min(1, "La bodega de destino es requerida"),
@@ -41,6 +41,8 @@ interface SupplierInboundFormProps {
   onSubmit: (values: CreateSupplierInboundDto) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
+  preselectedProductId?: string | null;
+  preselectedWarehouseId?: string | null;
 }
 
 export function SupplierInboundForm({
@@ -50,11 +52,13 @@ export function SupplierInboundForm({
   onSubmit,
   onCancel,
   loading = false,
+  preselectedProductId = null,
+  preselectedWarehouseId = null,
 }: SupplierInboundFormProps) {
   const initialValues: SupplierInboundFormValues = {
-    contactId: "",
-    destinationWarehouseId: "",
-    details: [{ productId: "", amount: 1 }],
+    supplierId: "",
+    destinationWarehouseId: preselectedWarehouseId || "",
+    details: [{ productId: preselectedProductId || "", amount: 1 }],
   };
 
   const validate = (values: SupplierInboundFormValues) => {
@@ -102,21 +106,21 @@ export function SupplierInboundForm({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field name="contactId">
+                  <Field name="supplierId">
                     {({ field }: FieldProps) => (
                       <div className="space-y-2">
-                        <Label htmlFor="contactId">
+                        <Label htmlFor="supplierId">
                           Proveedor <span className="text-red-500">*</span>
                         </Label>
                         <Select
                           value={field.value}
                           onValueChange={(value) =>
-                            setFieldValue("contactId", value)
+                            setFieldValue("supplierId", value)
                           }
                         >
                           <SelectTrigger
                             className={`overflow-hidden max-w-56 ${
-                              errors.contactId && touched.contactId
+                              errors.supplierId && touched.supplierId
                                 ? "border-red-500"
                                 : ""
                             }`}
@@ -140,9 +144,9 @@ export function SupplierInboundForm({
                             ))}
                           </SelectContent>
                         </Select>
-                        {errors.contactId && touched.contactId && (
+                        {errors.supplierId && touched.supplierId && (
                           <p className="text-sm text-red-500">
-                            {errors.contactId}
+                            {errors.supplierId}
                           </p>
                         )}
                       </div>

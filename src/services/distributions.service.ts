@@ -16,7 +16,7 @@ export interface CreateWarehouseTransferDto {
 }
 
 export interface CreateSupplierInboundDto {
-  contactId: string;
+  supplierId: string;
   destinationWarehouseId: string;
   details: Array<{
     productId: string;
