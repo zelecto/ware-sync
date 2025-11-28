@@ -11,14 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CreateWarehouseTransferDto } from "@/services/distributions.service";
+import type { CreateSupplierInboundDto } from "@/services/distributions.service";
 import type { Warehouse } from "@/interface/warehouse";
 import type { Contact } from "@/interface/contact";
 import type { Product } from "@/interface/product";
 import { Trash2, Plus } from "lucide-react";
 
-const distributionSchema = z.object({
-  originWarehouseId: z.string().min(1, "La bodega de origen es requerida"),
+const supplierInboundSchema = z.object({
+  contactId: z.string().min(1, "El proveedor es requerido"),
   destinationWarehouseId: z
     .string()
     .min(1, "La bodega de destino es requerida"),
@@ -32,32 +32,34 @@ const distributionSchema = z.object({
     .min(1, "Debe agregar al menos un producto"),
 });
 
-type DistributionFormValues = z.infer<typeof distributionSchema>;
+type SupplierInboundFormValues = z.infer<typeof supplierInboundSchema>;
 
-interface DistributionFormProps {
+interface SupplierInboundFormProps {
   warehouses: Warehouse[];
+  suppliers: Contact[];
   products: Product[];
-  onSubmit: (values: CreateWarehouseTransferDto) => Promise<void>;
+  onSubmit: (values: CreateSupplierInboundDto) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
 }
 
-export function DistributionForm({
+export function SupplierInboundForm({
   warehouses,
+  suppliers,
   products,
   onSubmit,
   onCancel,
   loading = false,
-}: DistributionFormProps) {
-  const initialValues: DistributionFormValues = {
-    originWarehouseId: "",
+}: SupplierInboundFormProps) {
+  const initialValues: SupplierInboundFormValues = {
+    contactId: "",
     destinationWarehouseId: "",
     details: [{ productId: "", amount: 1 }],
   };
 
-  const validate = (values: DistributionFormValues) => {
+  const validate = (values: SupplierInboundFormValues) => {
     try {
-      distributionSchema.parse(values);
+      supplierInboundSchema.parse(values);
       return {};
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -71,104 +73,78 @@ export function DistributionForm({
     }
   };
 
-  const handleSubmit = async (values: DistributionFormValues) => {
-    await onSubmit(values);
-  };
-
-  const getAvailableProducts = (originWarehouseId: string) => {
-    if (!originWarehouseId) return [];
-
-    return products.filter((product) => {
-      const warehouseProduct = product.warehouses?.find(
-        (wp) => wp.warehouseId === originWarehouseId
-      );
-      return warehouseProduct && warehouseProduct.quantity > 0;
-    });
-  };
-
-  const getProductStock = (productId: string, originWarehouseId: string) => {
-    const product = products.find((p) => p.id === productId);
-    if (!product) return 0;
-
-    const warehouseProduct = product.warehouses?.find(
-      (wp) => wp.warehouseId === originWarehouseId
-    );
-    return warehouseProduct?.quantity || 0;
-  };
-
   return (
     <Formik
       initialValues={initialValues}
       validate={validate}
-      onSubmit={handleSubmit}
+      onSubmit={onSubmit}
       enableReinitialize
     >
       {({ errors, touched, values, setFieldValue }) => {
-        const availableProducts = getAvailableProducts(
-          values.originWarehouseId
-        );
+        // Filtrar productos ya seleccionados
+        const getAvailableProducts = (currentIndex: number) => {
+          const selectedProductIds = values.details
+            .map((d, i) => (i !== currentIndex ? d.productId : null))
+            .filter(Boolean);
+          return products.filter((p) => !selectedProductIds.includes(p.id));
+        };
 
         return (
           <Form>
             <Card className="max-w-lg">
               <CardHeader>
-                <h2 className="text-lg font-semibold">Nueva Transferencia</h2>
+                <h2 className="text-lg font-semibold">
+                  Nueva Entrada desde Proveedor
+                </h2>
                 <p className="text-sm text-muted-foreground">
-                  Transfiera productos entre bodegas
+                  Registre la entrada de productos desde un proveedor
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field name="originWarehouseId">
+                  <Field name="contactId">
                     {({ field }: FieldProps) => (
                       <div className="space-y-2">
-                        <Label htmlFor="originWarehouseId">
-                          Bodega de Origen{" "}
-                          <span className="text-red-500">*</span>
+                        <Label htmlFor="contactId">
+                          Proveedor <span className="text-red-500">*</span>
                         </Label>
                         <Select
                           value={field.value}
-                          onValueChange={(value) => {
-                            setFieldValue("originWarehouseId", value);
-                            setFieldValue("destinationWarehouseId", "");
-                            setFieldValue("details", [
-                              { productId: "", amount: 1 },
-                            ]);
-                          }}
+                          onValueChange={(value) =>
+                            setFieldValue("contactId", value)
+                          }
                         >
                           <SelectTrigger
                             className={`overflow-hidden max-w-56 ${
-                              errors.originWarehouseId &&
-                              touched.originWarehouseId
+                              errors.contactId && touched.contactId
                                 ? "border-red-500"
                                 : ""
                             }`}
                           >
                             <SelectValue
-                              placeholder="Seleccione bodega de origen"
+                              placeholder="Seleccione proveedor"
                               className="truncate"
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            {warehouses.map((warehouse) => (
+                            {suppliers.map((supplier) => (
                               <SelectItem
-                                key={warehouse.id}
-                                value={warehouse.id}
+                                key={supplier.id}
+                                value={supplier.id}
                                 className="max-w-full"
                               >
                                 <span className="truncate block">
-                                  {warehouse.name} - {warehouse.city}
+                                  {supplier.person.fullName} - {supplier.type}
                                 </span>
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        {errors.originWarehouseId &&
-                          touched.originWarehouseId && (
-                            <p className="text-sm text-red-500">
-                              {errors.originWarehouseId}
-                            </p>
-                          )}
+                        {errors.contactId && touched.contactId && (
+                          <p className="text-sm text-red-500">
+                            {errors.contactId}
+                          </p>
+                        )}
                       </div>
                     )}
                   </Field>
@@ -195,24 +171,22 @@ export function DistributionForm({
                             }`}
                           >
                             <SelectValue
-                              placeholder="Seleccione bodega de destino"
+                              placeholder="Seleccione bodega"
                               className="truncate"
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            {warehouses
-                              .filter((w) => w.id !== values.originWarehouseId)
-                              .map((warehouse) => (
-                                <SelectItem
-                                  key={warehouse.id}
-                                  value={warehouse.id}
-                                  className="max-w-full"
-                                >
-                                  <span className="truncate block">
-                                    {warehouse.name} - {warehouse.city}
-                                  </span>
-                                </SelectItem>
-                              ))}
+                            {warehouses.map((warehouse) => (
+                              <SelectItem
+                                key={warehouse.id}
+                                value={warehouse.id}
+                                className="max-w-full"
+                              >
+                                <span className="truncate block">
+                                  {warehouse.name} - {warehouse.city}
+                                </span>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         {errors.destinationWarehouseId &&
@@ -230,38 +204,12 @@ export function DistributionForm({
                   <Label>
                     Productos <span className="text-red-500">*</span>
                   </Label>
-                  {!values.originWarehouseId && (
-                    <p className="text-sm text-muted-foreground">
-                      Seleccione una bodega de origen para ver los productos
-                      disponibles
-                    </p>
-                  )}
-                  {values.originWarehouseId &&
-                    availableProducts.length === 0 && (
-                      <p className="text-sm text-amber-600">
-                        No hay productos con stock disponible en esta bodega
-                      </p>
-                    )}
                   <FieldArray name="details">
                     {({ push, remove }) => (
                       <div className="space-y-2">
                         {values.details.map((detail, index) => {
-                          const stock = detail.productId
-                            ? getProductStock(
-                                detail.productId,
-                                values.originWarehouseId
-                              )
-                            : 0;
-
-                          // Filtrar productos ya seleccionados en otros campos
-                          const selectedProductIds = values.details
-                            .map((d, i) => (i !== index ? d.productId : null))
-                            .filter(Boolean);
-
                           const availableProductsForThisField =
-                            availableProducts.filter(
-                              (p) => !selectedProductIds.includes(p.id)
-                            );
+                            getAvailableProducts(index);
 
                           return (
                             <div
@@ -279,7 +227,6 @@ export function DistributionForm({
                                           value
                                         )
                                       }
-                                      disabled={!values.originWarehouseId}
                                     >
                                       <SelectTrigger className="h-9 overflow-hidden">
                                         <SelectValue
@@ -289,36 +236,20 @@ export function DistributionForm({
                                       </SelectTrigger>
                                       <SelectContent>
                                         {availableProductsForThisField.map(
-                                          (product) => {
-                                            const warehouseProduct =
-                                              product.warehouses?.find(
-                                                (wp) =>
-                                                  wp.warehouseId ===
-                                                  values.originWarehouseId
-                                              );
-                                            return (
-                                              <SelectItem
-                                                key={product.id}
-                                                value={product.id}
-                                                className="max-w-full"
-                                              >
-                                                <span className="truncate block">
-                                                  {product.name} ({product.sku}){" "}
-                                                  - Stock:{" "}
-                                                  {warehouseProduct?.quantity ||
-                                                    0}
-                                                </span>
-                                              </SelectItem>
-                                            );
-                                          }
+                                          (product) => (
+                                            <SelectItem
+                                              key={product.id}
+                                              value={product.id}
+                                              className="max-w-full"
+                                            >
+                                              <span className="truncate block">
+                                                {product.name} ({product.sku})
+                                              </span>
+                                            </SelectItem>
+                                          )
                                         )}
                                       </SelectContent>
                                     </Select>
-                                    {field.value && stock > 0 && (
-                                      <p className="text-xs text-muted-foreground">
-                                        Stock disponible: {stock}
-                                      </p>
-                                    )}
                                   </div>
                                 )}
                               </Field>
@@ -330,7 +261,6 @@ export function DistributionForm({
                                       {...field}
                                       type="number"
                                       min="1"
-                                      max={stock}
                                       placeholder="Cant."
                                       className="h-9"
                                       onChange={(e) =>
@@ -366,10 +296,6 @@ export function DistributionForm({
                           size="sm"
                           onClick={() => push({ productId: "", amount: 1 })}
                           className="w-full"
-                          disabled={
-                            !values.originWarehouseId ||
-                            availableProducts.length === 0
-                          }
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Agregar Producto
@@ -389,7 +315,7 @@ export function DistributionForm({
                     Cancelar
                   </Button>
                   <Button type="submit" disabled={loading}>
-                    {loading ? "Creando..." : "Crear Transferencia"}
+                    {loading ? "Creando..." : "Crear Entrada"}
                   </Button>
                 </div>
               </CardContent>

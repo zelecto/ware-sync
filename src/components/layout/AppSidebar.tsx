@@ -6,6 +6,7 @@ import {
   Package,
   Warehouse,
   Truck,
+  ArrowDownToLine,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -28,7 +29,8 @@ const menuItems = [
   { title: "Contactos", url: "/contacts", icon: Contact },
   { title: "Productos", url: "/products", icon: Package },
   { title: "Almacenes", url: "/warehouses", icon: Warehouse },
-  { title: "Distribuciones", url: "/distributions", icon: Truck },
+  { title: "Transferencias", url: "/distributions", icon: Truck },
+  { title: "Entradas", url: "/distributions/inbound", icon: ArrowDownToLine },
 ];
 
 const userData = {

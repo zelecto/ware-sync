@@ -5,13 +5,14 @@ import type { User } from "./user";
 import type { Product } from "./product";
 
 export interface Distribution extends BaseEntity {
-  originWarehouseId: string;
-  destinationWarehouseId?: string;
+  originWarehouseId?: string;
+  destinationWarehouseId: string;
   contactId?: string;
   status: DistributionStatus;
+  type: DistributionType;
   createdBy: string;
-  originWarehouse: Warehouse;
-  destinationWarehouse?: Warehouse;
+  originWarehouse?: Warehouse;
+  destinationWarehouse: Warehouse;
   contact?: Contact;
   creator: User;
   details: DistributionDetail[];
@@ -28,4 +29,9 @@ export enum DistributionStatus {
   PENDING = "PENDING",
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
+}
+
+export enum DistributionType {
+  SUPPLIER_INBOUND = "SUPPLIER_INBOUND",
+  WAREHOUSE_TRANSFER = "WAREHOUSE_TRANSFER",
 }

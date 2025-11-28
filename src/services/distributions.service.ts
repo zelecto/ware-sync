@@ -6,20 +6,22 @@ import type {
 } from "@/interface/pagination";
 import { createPaginationQueryParams } from "@/lib/pagination-utils";
 
-export interface CreateDistributionDto {
+export interface CreateWarehouseTransferDto {
   originWarehouseId: string;
-  destinationWarehouseId?: string;
-  contactId?: string;
+  destinationWarehouseId: string;
   details: Array<{
     productId: string;
     amount: number;
   }>;
 }
 
-export interface UpdateDistributionDto {
-  originWarehouseId?: string;
-  destinationWarehouseId?: string;
-  contactId?: string;
+export interface CreateSupplierInboundDto {
+  contactId: string;
+  destinationWarehouseId: string;
+  details: Array<{
+    productId: string;
+    amount: number;
+  }>;
 }
 
 export const distributionsService = {
@@ -44,17 +46,27 @@ export const distributionsService = {
     }
   },
 
-  async create(data: CreateDistributionDto): Promise<Distribution> {
+  async createWarehouseTransfer(
+    data: CreateWarehouseTransferDto
+  ): Promise<Distribution> {
     try {
-      return await apiClient.post<Distribution>("/distribution", data);
+      return await apiClient.post<Distribution>(
+        "/distribution/warehouse-transfer",
+        data
+      );
     } catch (error) {
       handleApiError(error);
     }
   },
 
-  async update(id: string, data: UpdateDistributionDto): Promise<Distribution> {
+  async createSupplierInbound(
+    data: CreateSupplierInboundDto
+  ): Promise<Distribution> {
     try {
-      return await apiClient.patch<Distribution>(`/distribution/${id}`, data);
+      return await apiClient.post<Distribution>(
+        "/distribution/supplier-inbound",
+        data
+      );
     } catch (error) {
       handleApiError(error);
     }

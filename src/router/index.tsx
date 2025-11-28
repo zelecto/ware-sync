@@ -20,6 +20,8 @@ import EditWarehouse from "@/page/Warehouses/Edit";
 import Distributions from "@/page/Distributions/Index";
 import CreateDistribution from "@/page/Distributions/Create";
 import ShowDistribution from "@/page/Distributions/Show";
+import SupplierInbound from "@/page/Distributions/Inbound";
+import CreateSupplierInbound from "@/page/Distributions/CreateInbound";
 import NotFound from "@/page/NotFound";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PublicRoute } from "@/components/auth/PublicRoute";
@@ -147,6 +149,18 @@ export const router = createBrowserRouter([
           },
           {
             path: "show/:id",
+            element: <ShowDistribution />,
+          },
+          {
+            path: "inbound",
+            element: <SupplierInbound />,
+          },
+          {
+            path: "inbound/create",
+            element: <CreateSupplierInbound />,
+          },
+          {
+            path: "inbound/show/:id",
             element: <ShowDistribution />,
           },
         ],

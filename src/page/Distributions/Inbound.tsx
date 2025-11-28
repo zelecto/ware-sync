@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui";
-import { DistributionTable } from "@/components/distribution";
+import { SupplierInboundTable } from "@/components/distribution";
 import { distributionsService } from "@/services/distributions.service";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Distribution } from "@/interface/distribution";
@@ -13,7 +13,7 @@ import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 import { usePagination } from "@/hooks/usePagination";
 import { handlePaginatedResponse } from "@/lib/pagination-helper";
 
-export default function Distributions() {
+export default function SupplierInbound() {
   const navigate = useNavigate();
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ export default function Distributions() {
     initialLimit: 10,
   });
 
-  useBreadcrumbItem("Transferencias");
+  useBreadcrumbItem("Entradas desde Proveedores");
 
   const loadDistributions = async () => {
     try {
@@ -40,14 +40,14 @@ export default function Distributions() {
         pagination.currentPage,
         pagination.limit
       );
-      // Filtrar solo transferencias entre bodegas
-      const warehouseTransfers = data.filter(
-        (d) => d.type === DistributionType.WAREHOUSE_TRANSFER
+      // Filtrar solo entradas desde proveedores
+      const supplierInbounds = data.filter(
+        (d) => d.type === DistributionType.SUPPLIER_INBOUND
       );
-      setDistributions(warehouseTransfers);
+      setDistributions(supplierInbounds);
       pagination.updateFromMeta(meta);
     } catch (error: any) {
-      toast.error("Error al cargar las transferencias");
+      toast.error("Error al cargar las entradas desde proveedores");
       setDistributions([]);
     } finally {
       setLoading(false);
@@ -59,7 +59,7 @@ export default function Distributions() {
   }, [pagination.currentPage, pagination.limit]);
 
   const handleView = (id: string) => {
-    navigate(`/distributions/show/${id}`);
+    navigate(`/distributions/inbound/show/${id}`);
   };
 
   const handleComplete = (id: string) => {
@@ -80,13 +80,13 @@ export default function Distributions() {
     try {
       if (confirmDialog.type === "complete") {
         await distributionsService.complete(confirmDialog.distributionId);
-        toast.success("Transferencia completada exitosamente");
+        toast.success("Entrada completada exitosamente");
       } else if (confirmDialog.type === "cancel") {
         await distributionsService.cancel(confirmDialog.distributionId);
-        toast.success("Transferencia cancelada exitosamente");
+        toast.success("Entrada cancelada exitosamente");
       } else if (confirmDialog.type === "delete") {
         await distributionsService.remove(confirmDialog.distributionId);
-        toast.success("Transferencia eliminada exitosamente");
+        toast.success("Entrada eliminada exitosamente");
       }
       loadDistributions();
     } catch (error: any) {
@@ -99,7 +99,7 @@ export default function Distributions() {
             : confirmDialog.type === "cancel"
             ? "cancelar"
             : "eliminar"
-        } la transferencia`;
+        } la entrada`;
       toast.error(errorMessage);
     }
   };
@@ -108,25 +108,25 @@ export default function Distributions() {
     switch (confirmDialog.type) {
       case "complete":
         return {
-          title: "Completar Transferencia",
+          title: "Completar Entrada",
           description:
-            "¿Está seguro de completar esta transferencia? Esta acción actualizará los inventarios y no se puede deshacer.",
+            "¿Está seguro de completar esta entrada? Los productos se agregarán al inventario y esta acción no se puede deshacer.",
           confirmText: "Completar",
           variant: "default" as const,
         };
       case "cancel":
         return {
-          title: "Cancelar Transferencia",
+          title: "Cancelar Entrada",
           description:
-            "¿Está seguro de cancelar esta transferencia? Esta acción devolverá el stock a la bodega de origen.",
-          confirmText: "Cancelar Transferencia",
+            "¿Está seguro de cancelar esta entrada? Solo cambiará el estado, no afecta el inventario.",
+          confirmText: "Cancelar Entrada",
           variant: "destructive" as const,
         };
       case "delete":
         return {
-          title: "Eliminar Transferencia",
+          title: "Eliminar Entrada",
           description:
-            "¿Está seguro de eliminar esta transferencia? Esta acción no se puede deshacer.",
+            "¿Está seguro de eliminar esta entrada? Esta acción no se puede deshacer.",
           confirmText: "Eliminar",
           variant: "destructive" as const,
         };
@@ -143,18 +143,18 @@ export default function Distributions() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Transferencias entre Bodegas</h1>
-        <Button onClick={() => navigate("/distributions/create")}>
+        <h1 className="text-2xl font-bold">Entradas desde Proveedores</h1>
+        <Button onClick={() => navigate("/distributions/inbound/create")}>
           <Plus className="w-4 h-4 mr-2" />
-          Nueva Transferencia
+          Nueva Entrada
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold">Lista de Transferencias</h2>
+          <h2 className="text-lg font-semibold">Lista de Entradas</h2>
           <p className="text-sm text-muted-foreground">
-            Gestione las transferencias de productos entre bodegas
+            Gestione las entradas de productos desde proveedores
           </p>
         </CardHeader>
         <CardContent>
@@ -164,7 +164,7 @@ export default function Distributions() {
             </div>
           ) : (
             <div className="space-y-4">
-              <DistributionTable
+              <SupplierInboundTable
                 distributions={distributions}
                 onView={handleView}
                 onComplete={handleComplete}
@@ -175,7 +175,7 @@ export default function Distributions() {
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
                     Página {pagination.currentPage} de {pagination.totalPages} (
-                    {pagination.total} transferencias)
+                    {pagination.total} entradas)
                   </div>
                   <div className="flex gap-2">
                     <Button

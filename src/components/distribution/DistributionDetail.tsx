@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Distribution } from "@/interface/distribution";
-import { DistributionStatus } from "@/interface/distribution";
+import { DistributionStatus, DistributionType } from "@/interface/distribution";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { formatDate, formatTime, formatDateTime } from "@/lib/date-utils";
 
@@ -44,6 +44,11 @@ export function DistributionDetail({
   onCancel,
 }: DistributionDetailProps) {
   const config = statusConfig[distribution.status];
+  const isSupplierInbound =
+    distribution.type === DistributionType.SUPPLIER_INBOUND;
+  const title = isSupplierInbound
+    ? "Detalle de Entrada"
+    : "Detalle de Transferencia";
 
   return (
     <div className="space-y-6">
@@ -51,7 +56,7 @@ export function DistributionDetail({
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-2xl font-bold">Detalle de Distribución</h1>
+        <h1 className="text-2xl font-bold">{title}</h1>
       </div>
 
       <Card>
@@ -76,29 +81,18 @@ export function DistributionDetail({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Bodega de Origen
+                {distribution.originWarehouse
+                  ? "Bodega de Origen"
+                  : "Proveedor"}
               </p>
-              <p className="text-base font-semibold">
-                {distribution.originWarehouse.name}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {distribution.originWarehouse.city} -{" "}
-                {distribution.originWarehouse.address}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Destino
-              </p>
-              {distribution.destinationWarehouse ? (
+              {distribution.originWarehouse ? (
                 <>
                   <p className="text-base font-semibold">
-                    {distribution.destinationWarehouse.name}
+                    {distribution.originWarehouse.name}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {distribution.destinationWarehouse.city} -{" "}
-                    {distribution.destinationWarehouse.address}
+                    {distribution.originWarehouse.city} -{" "}
+                    {distribution.originWarehouse.address}
                   </p>
                 </>
               ) : distribution.contact ? (
@@ -114,6 +108,19 @@ export function DistributionDetail({
               ) : (
                 <p className="text-base">-</p>
               )}
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Bodega de Destino
+              </p>
+              <p className="text-base font-semibold">
+                {distribution.destinationWarehouse.name}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {distribution.destinationWarehouse.city} -{" "}
+                {distribution.destinationWarehouse.address}
+              </p>
             </div>
 
             <div>
@@ -138,7 +145,9 @@ export function DistributionDetail({
                   className="flex items-center gap-2"
                 >
                   <CheckCircle className="h-4 w-4" />
-                  Completar Distribución
+                  {isSupplierInbound
+                    ? "Completar Entrada"
+                    : "Completar Transferencia"}
                 </Button>
                 <Button
                   variant="destructive"
@@ -146,7 +155,9 @@ export function DistributionDetail({
                   className="flex items-center gap-2"
                 >
                   <XCircle className="h-4 w-4" />
-                  Cancelar Distribución
+                  {isSupplierInbound
+                    ? "Cancelar Entrada"
+                    : "Cancelar Transferencia"}
                 </Button>
               </div>
             )}

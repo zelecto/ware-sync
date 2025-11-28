@@ -1,33 +1,39 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { DistributionForm } from "@/components/distribution";
+import { SupplierInboundForm } from "@/components/distribution";
 import { distributionsService } from "@/services/distributions.service";
 import { warehousesService } from "@/services/warehouses.service";
+import { contactsService } from "@/services/contacts.service";
 import { productsService } from "@/services/products.service";
-import type { CreateWarehouseTransferDto } from "@/services/distributions.service";
+import type { CreateSupplierInboundDto } from "@/services/distributions.service";
 import type { Warehouse } from "@/interface/warehouse";
+import type { Contact } from "@/interface/contact";
 import type { Product } from "@/interface/product";
 import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
-export default function CreateDistribution() {
+export default function CreateSupplierInbound() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [suppliers, setSuppliers] = useState<Contact[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
-  useBreadcrumbItem("Crear Transferencia");
+  useBreadcrumbItem("Crear Entrada");
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setDataLoading(true);
-        const [warehousesResponse, productsResponse] = await Promise.all([
-          warehousesService.findAll({ page: 1, limit: 100 }),
-          productsService.findAll({ page: 1, limit: 100 }),
-        ]);
+        const [warehousesResponse, suppliersResponse, productsResponse] =
+          await Promise.all([
+            warehousesService.findAll({ page: 1, limit: 100 }),
+            contactsService.findAll({ page: 1, limit: 100 }),
+            productsService.findAll({ page: 1, limit: 100 }),
+          ]);
         setWarehouses(warehousesResponse.data);
+        setSuppliers(suppliersResponse.data);
         setProducts(productsResponse.data);
       } catch (error: any) {
         toast.error("Error al cargar los datos");
@@ -39,17 +45,17 @@ export default function CreateDistribution() {
     loadData();
   }, []);
 
-  const handleSubmit = async (values: CreateWarehouseTransferDto) => {
+  const handleSubmit = async (values: CreateSupplierInboundDto) => {
     try {
       setLoading(true);
-      await distributionsService.createWarehouseTransfer(values);
-      toast.success("Transferencia creada exitosamente");
-      navigate("/distributions");
+      await distributionsService.createSupplierInbound(values);
+      toast.success("Entrada creada exitosamente");
+      navigate("/distributions/inbound");
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Error al crear la transferencia";
+        "Error al crear la entrada";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -57,7 +63,7 @@ export default function CreateDistribution() {
   };
 
   const handleCancel = () => {
-    navigate("/distributions");
+    navigate("/distributions/inbound");
   };
 
   if (dataLoading) {
@@ -71,13 +77,14 @@ export default function CreateDistribution() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Crear Transferencia</h1>
+        <h1 className="text-2xl font-bold">Crear Entrada desde Proveedor</h1>
         <p className="text-muted-foreground">
-          Transfiera productos entre bodegas
+          Registre la entrada de productos desde un proveedor
         </p>
       </div>
-      <DistributionForm
+      <SupplierInboundForm
         warehouses={warehouses}
+        suppliers={suppliers}
         products={products}
         onSubmit={handleSubmit}
         onCancel={handleCancel}

@@ -5,6 +5,7 @@ import { DistributionDetail } from "@/components/distribution";
 import { distributionsService } from "@/services/distributions.service";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Distribution } from "@/interface/distribution";
+import { DistributionType } from "@/interface/distribution";
 import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 
 export default function ShowDistribution() {
@@ -19,11 +20,11 @@ export default function ShowDistribution() {
 
   // Actualizar breadcrumb con información de la distribución
   const breadcrumbLabel = distribution
-    ? `${distribution.originWarehouse.name} → ${
-        distribution.destinationWarehouse?.name ||
-        distribution.contact?.person.fullName ||
-        "Cliente"
-      }`
+    ? distribution.originWarehouse
+      ? `${distribution.originWarehouse.name} → ${distribution.destinationWarehouse.name}`
+      : `${distribution.contact?.person.fullName || "Proveedor"} → ${
+          distribution.destinationWarehouse.name
+        }`
     : "Detalle";
   useBreadcrumbItem(breadcrumbLabel);
 
@@ -47,7 +48,12 @@ export default function ShowDistribution() {
   }, [id]);
 
   const handleBack = () => {
-    navigate("/distributions");
+    // Navegar según el tipo de distribución
+    if (distribution?.type === DistributionType.SUPPLIER_INBOUND) {
+      navigate("/distributions/inbound");
+    } else {
+      navigate("/distributions");
+    }
   };
 
   const handleComplete = (distributionId: string) => {
@@ -62,21 +68,36 @@ export default function ShowDistribution() {
     if (!id) return;
 
     try {
+      const isSupplierInbound =
+        distribution?.type === DistributionType.SUPPLIER_INBOUND;
+      const entityName = isSupplierInbound ? "entrada" : "transferencia";
+
       if (confirmDialog.type === "complete") {
         await distributionsService.complete(id);
-        toast.success("Distribución completada exitosamente");
+        toast.success(
+          `${
+            entityName.charAt(0).toUpperCase() + entityName.slice(1)
+          } completada exitosamente`
+        );
       } else if (confirmDialog.type === "cancel") {
         await distributionsService.cancel(id);
-        toast.success("Distribución cancelada exitosamente");
+        toast.success(
+          `${
+            entityName.charAt(0).toUpperCase() + entityName.slice(1)
+          } cancelada exitosamente`
+        );
       }
       loadDistribution();
     } catch (error: any) {
+      const isSupplierInbound =
+        distribution?.type === DistributionType.SUPPLIER_INBOUND;
+      const entityName = isSupplierInbound ? "entrada" : "transferencia";
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         `Error al ${
           confirmDialog.type === "complete" ? "completar" : "cancelar"
-        } la distribución`;
+        } la ${entityName}`;
       toast.error(errorMessage);
     }
   };
@@ -113,18 +134,28 @@ export default function ShowDistribution() {
         onConfirm={handleConfirmAction}
         title={
           confirmDialog.type === "complete"
-            ? "Completar Distribución"
-            : "Cancelar Distribución"
+            ? distribution?.type === DistributionType.SUPPLIER_INBOUND
+              ? "Completar Entrada"
+              : "Completar Transferencia"
+            : distribution?.type === DistributionType.SUPPLIER_INBOUND
+            ? "Cancelar Entrada"
+            : "Cancelar Transferencia"
         }
         description={
           confirmDialog.type === "complete"
-            ? "¿Está seguro de completar esta distribución? Esta acción actualizará los inventarios y no se puede deshacer."
-            : "¿Está seguro de cancelar esta distribución? Esta acción no se puede deshacer."
+            ? distribution?.type === DistributionType.SUPPLIER_INBOUND
+              ? "¿Está seguro de completar esta entrada? Los productos se agregarán al inventario y esta acción no se puede deshacer."
+              : "¿Está seguro de completar esta transferencia? Esta acción actualizará los inventarios y no se puede deshacer."
+            : distribution?.type === DistributionType.SUPPLIER_INBOUND
+            ? "¿Está seguro de cancelar esta entrada? Solo cambiará el estado, no afecta el inventario."
+            : "¿Está seguro de cancelar esta transferencia? Esta acción devolverá el stock a la bodega de origen."
         }
         confirmText={
           confirmDialog.type === "complete"
             ? "Completar"
-            : "Cancelar Distribución"
+            : distribution?.type === DistributionType.SUPPLIER_INBOUND
+            ? "Cancelar Entrada"
+            : "Cancelar Transferencia"
         }
         variant={confirmDialog.type === "cancel" ? "destructive" : "default"}
       />
