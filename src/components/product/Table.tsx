@@ -7,7 +7,7 @@ import { DataTable } from "../ui/data-table";
 import type { Product } from "@/interface/product";
 import { Badge } from "../ui/badge";
 import { productsService } from "@/services/products.service";
-import { useFilters } from "@/hooks/useFilters";
+import { usePagination } from "@/hooks/usePagination";
 import { unitLabels, type ProductUnit } from "@/types/product";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
@@ -26,34 +26,31 @@ export function ProductTable({
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [meta, setMeta] = useState<any>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     productId: string | null;
   }>({ open: false, productId: null });
 
-  const { filterParams, updateSearch, updatePage, updateLimit, page, limit } =
-    useFilters({
-      page: 1,
-      limit: 10,
-    });
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updateSearch(searchInput);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchInput, updateSearch]);
+  const pagination = usePagination({
+    initialPage: 1,
+    initialLimit: 10,
+    limitOptions: [5, 10, 25, 50],
+  });
 
   const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await productsService.findAll(filterParams);
+      const params = {
+        ...pagination.paginationParams,
+        search: searchInput || undefined,
+      };
+
+      const response = await productsService.findAll(params);
 
       setProducts(response.data);
-      setMeta(response.meta);
+      pagination.updateFromMeta(response.meta);
     } catch (err: any) {
       setError(err.message || "Error al cargar productos");
       setProducts([]);
@@ -63,8 +60,11 @@ export function ProductTable({
   };
 
   useEffect(() => {
-    loadProducts();
-  }, [filterParams]);
+    const timer = setTimeout(() => {
+      loadProducts();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput, pagination.currentPage, pagination.limit]);
 
   const handleDelete = (id: string) => {
     setConfirmDialog({ open: true, productId: id });
@@ -173,15 +173,15 @@ export function ProductTable({
       <DataTable
         data={products}
         columns={columns}
-        currentPage={page}
-        totalPages={meta?.totalPages || 0}
-        limit={limit}
-        total={meta?.total || 0}
-        hasNextPage={meta?.hasNextPage || false}
-        hasPreviousPage={meta?.hasPreviousPage || false}
-        limitOptions={[5, 10, 25, 50]}
-        onPageChange={updatePage}
-        onLimitChange={updateLimit}
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        limit={pagination.limit}
+        total={pagination.total}
+        hasNextPage={pagination.hasNextPage}
+        hasPreviousPage={pagination.hasPreviousPage}
+        limitOptions={pagination.limitOptions}
+        onPageChange={pagination.setPage}
+        onLimitChange={pagination.setLimit}
         isLoading={loading}
         emptyMessage={
           searchInput

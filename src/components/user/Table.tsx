@@ -133,11 +133,19 @@ export function UserTable({
     {
       key: "role",
       header: "Rol",
-      render: (user: User) => (
-        <Badge variant={user.role === UserRole.ADMIN ? "default" : "outline"}>
-          {user.role}
-        </Badge>
-      ),
+      render: (user: User) => {
+        const roleLabels = {
+          [UserRole.ADMIN]: "Administrador",
+          [UserRole.WORKER]: "Trabajador",
+        };
+        const roleColors = {
+          [UserRole.ADMIN]: "default" as const,
+          [UserRole.WORKER]: "secondary" as const,
+        };
+        return (
+          <Badge variant={roleColors[user.role]}>{roleLabels[user.role]}</Badge>
+        );
+      },
     },
     {
       key: "actions",

@@ -1,14 +1,17 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import type { ReactNode } from "react";
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
   redirectTo?: string;
+  children?: ReactNode;
 }
 
 export const ProtectedRoute = ({
   allowedRoles,
   redirectTo = "/login",
+  children,
 }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, hasRole } = useAuth();
 
@@ -37,5 +40,5 @@ export const ProtectedRoute = ({
     );
   }
 
-  return <Outlet />;
+  return children ? <>{children}</> : <Outlet />;
 };

@@ -21,24 +21,56 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { NavUser } from "./NavUser";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserRole } from "@/interface/user";
 
 const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Usuarios", url: "/users", icon: Users },
-  { title: "Proveedores", url: "/contacts", icon: Contact },
-  { title: "Productos", url: "/products", icon: Package },
-  { title: "Almacenes", url: "/warehouses", icon: Warehouse },
-  { title: "Transferencias", url: "/distributions", icon: Truck },
-  { title: "Entradas", url: "/distributions/inbound", icon: ArrowDownToLine },
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+    roles: [UserRole.ADMIN, UserRole.WORKER],
+  },
+  {
+    title: "Usuarios",
+    url: "/users",
+    icon: Users,
+    roles: [UserRole.ADMIN],
+  },
+  {
+    title: "Proveedores",
+    url: "/contacts",
+    icon: Contact,
+    roles: [UserRole.ADMIN],
+  },
+  {
+    title: "Productos",
+    url: "/products",
+    icon: Package,
+    roles: [UserRole.ADMIN, UserRole.WORKER],
+  },
+  {
+    title: "Almacenes",
+    url: "/warehouses",
+    icon: Warehouse,
+    roles: [UserRole.ADMIN, UserRole.WORKER],
+  },
+  {
+    title: "Transferencias",
+    url: "/distributions",
+    icon: Truck,
+    roles: [UserRole.ADMIN, UserRole.WORKER],
+  },
+  {
+    title: "Entradas",
+    url: "/distributions/inbound",
+    icon: ArrowDownToLine,
+    roles: [UserRole.ADMIN, UserRole.WORKER],
+  },
 ];
 
-const userData = {
-  name: "Usuario",
-  email: "usuario@waresync.com",
-  avatar: "/avatars/user.jpg",
-};
-
 export function AppSidebar() {
+  const { user, hasRole } = useAuth();
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
@@ -69,22 +101,24 @@ export function AppSidebar() {
           <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems
+                .filter((item) => hasRole(item.roles))
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <Link to={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userData} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

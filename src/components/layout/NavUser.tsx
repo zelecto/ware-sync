@@ -18,18 +18,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-interface NavUserProps {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}
-
-export function NavUser({ user }: NavUserProps) {
+export function NavUser() {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user: authUser, logout } = useAuth();
+
+  if (!authUser) return null;
+
+  const user = {
+    name: authUser.person?.fullName || "Usuario",
+    email: authUser.person?.email || "usuario@waresync.com",
+    avatar: "",
+  };
 
   const handleLogout = () => {
     logout();

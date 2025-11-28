@@ -1,17 +1,13 @@
 import type React from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Package,
-  MapPin,
-  Building2,
-  AlertTriangle,
-  ExternalLink,
-} from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { Package, MapPin, Building2, AlertTriangle, Eye } from "lucide-react";
 import type { Warehouse } from "@/interface/warehouse";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface WarehouseDetailProps {
   warehouse: Warehouse;
@@ -19,19 +15,25 @@ interface WarehouseDetailProps {
 
 export function WarehouseDetail({ warehouse }: WarehouseDetailProps) {
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  // Calcular el total de productos y stock
   const totalProducts = warehouse.warehouseProducts?.length ?? 0;
   const totalStock =
     warehouse.warehouseProducts?.reduce((acc, p) => acc + p.quantity, 0) ?? 0;
 
-  // Productos con stock bajo
   const productsWithLowStock =
     warehouse.warehouseProducts?.filter(
       (p) => p.product.minStock !== undefined && p.quantity < p.product.minStock
     ) ?? [];
 
   const hasLowStockProducts = productsWithLowStock.length > 0;
+
+  const tableData = warehouse.warehouseProducts ?? [];
+  const totalPages = Math.ceil(totalProducts / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const paginatedData = tableData.slice(startIndex, endIndex);
 
   return (
     <div className="">
@@ -104,97 +106,104 @@ export function WarehouseDetail({ warehouse }: WarehouseDetailProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3">
-                  {warehouse.warehouseProducts.map((item) => {
-                    const isLowStock =
-                      item.product.minStock !== undefined &&
-                      item.quantity < item.product.minStock;
-
-                    return (
-                      <div
-                        key={item.id}
-                        className={`p-4 rounded-lg border-2 transition-all hover:shadow-md ${
-                          isLowStock
-                            ? "bg-amber-50 border-amber-200"
-                            : "bg-muted/30 hover:bg-muted/50"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-semibold text-base">
-                                {item.product.name}
-                              </h4>
-                              {isLowStock && (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-amber-100 text-amber-800 border-amber-300"
-                                >
-                                  <AlertTriangle className="w-3 h-3 mr-1" />
-                                  Stock bajo
-                                </Badge>
-                              )}
-                              {item.product.isActive === false && (
-                                <Badge variant="secondary">Inactivo</Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              SKU: {item.product.sku}
-                            </p>
-                            {item.product.minStock !== undefined && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Stock mínimo: {item.product.minStock} unidades
-                              </p>
+                <DataTable
+                  data={paginatedData}
+                  columns={[
+                    {
+                      key: "sku",
+                      header: "SKU",
+                      accessor: (item: any) => item.product.sku,
+                    },
+                    {
+                      key: "name",
+                      header: "Nombre",
+                      accessor: (item: any) => item.product.name,
+                    },
+                    {
+                      key: "quantity",
+                      header: "Cantidad",
+                      render: (item: any) => {
+                        const isLowStock =
+                          item.product.minStock !== undefined &&
+                          item.quantity < item.product.minStock;
+                        return (
+                          <span
+                            className={
+                              isLowStock ? "text-amber-600 font-semibold" : ""
+                            }
+                          >
+                            {item.quantity}
+                          </span>
+                        );
+                      },
+                    },
+                    {
+                      key: "minStock",
+                      header: "Stock Mínimo",
+                      accessor: (item: any) => item.product.minStock ?? "N/A",
+                    },
+                    {
+                      key: "status",
+                      header: "Estado",
+                      render: (item: any) => {
+                        const isLowStock =
+                          item.product.minStock !== undefined &&
+                          item.quantity < item.product.minStock;
+                        return (
+                          <div className="flex gap-2">
+                            {isLowStock && (
+                              <Badge
+                                variant="outline"
+                                className="bg-amber-100 text-amber-800 border-amber-300"
+                              >
+                                <AlertTriangle className="w-3 h-3 mr-1" />
+                                Stock bajo
+                              </Badge>
+                            )}
+                            {item.product.isActive === false && (
+                              <Badge variant="secondary">Inactivo</Badge>
+                            )}
+                            {!isLowStock && item.product.isActive !== false && (
+                              <Badge variant="default">Normal</Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            <div className="text-right">
-                              <p
-                                className={`text-2xl font-semibold ${
-                                  isLowStock
-                                    ? "text-amber-600"
-                                    : "text-foreground"
-                                }`}
-                              >
-                                {item.quantity}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                unidades
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                navigate(`/products/${item.productId}`)
-                              }
-                              title="Ver detalles del producto"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          </div>
+                        );
+                      },
+                    },
+                    {
+                      key: "actions",
+                      header: "Ver",
+                      render: (item: any) => (
+                        <div className="flex justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              navigate(`/products/${item.productId}`)
+                            }
+                            title="Ver detalles del producto"
+                          >
+                            <Eye className="w-4 h-4 text-gray-700" />
+                          </Button>
                         </div>
-
-                        {isLowStock && (
-                          <div className="mt-3 pt-3 border-t border-amber-200">
-                            <div className="flex items-start gap-2">
-                              <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                              <p className="text-xs text-amber-800">
-                                <span className="font-semibold">
-                                  Requiere reabastecimiento:
-                                </span>{" "}
-                                El inventario actual está por debajo del mínimo
-                                requerido. Se necesitan al menos{" "}
-                                {item.product.minStock! - item.quantity}{" "}
-                                unidades más.
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                      ),
+                    },
+                  ]}
+                  currentPage={page}
+                  totalPages={totalPages}
+                  limit={limit}
+                  total={totalProducts}
+                  hasNextPage={page < totalPages}
+                  hasPreviousPage={page > 1}
+                  limitOptions={[5, 10, 25, 50]}
+                  onPageChange={setPage}
+                  onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                  }}
+                  isLoading={false}
+                  emptyMessage="No hay productos en este almacén"
+                />
               </CardContent>
             </Card>
           )}

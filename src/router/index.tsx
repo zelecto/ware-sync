@@ -62,7 +62,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "/users",
-        element: <DashboardLayout />,
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             index: true,
@@ -80,7 +84,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "/contacts",
-        element: <DashboardLayout />,
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             index: true,
