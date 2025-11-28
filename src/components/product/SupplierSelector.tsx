@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { contactsService } from "@/services/contacts.service";
 import { ContactType, type Contact } from "@/interface/contact";
+import { FilterUtils } from "@/lib/filters";
 
 interface SupplierSelectorProps {
   selectedSupplierIds: string[];
@@ -33,15 +34,12 @@ export function SupplierSelector({
   useEffect(() => {
     const loadSuppliers = async () => {
       try {
-        const response = await contactsService.findByTypePaginated(
-          ContactType.PROVIDER,
-          { page: 1, limit: 100 }
-        );
-        // Filtrar solo los contactos que sean de tipo PROVIDER
-        const providers = response.data.filter(
-          (contact) => contact.type === ContactType.PROVIDER
-        );
-        setSuppliers(providers);
+        const response = await contactsService.findAll({
+          page: 1,
+          limit: 100,
+          filters: [FilterUtils.equals("type", ContactType.PROVIDER)],
+        });
+        setSuppliers(response.data);
       } catch (error) {
         console.error("Error al cargar proveedores:", error);
       } finally {

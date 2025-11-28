@@ -86,7 +86,6 @@ export function SupplierInboundForm({
       enableReinitialize
     >
       {({ errors, touched, values, setFieldValue }) => {
-        // Filtrar productos ya seleccionados
         const getAvailableProducts = (currentIndex: number) => {
           const selectedProductIds = values.details
             .map((d, i) => (i !== currentIndex ? d.productId : null))
@@ -139,7 +138,7 @@ export function SupplierInboundForm({
                                 className="max-w-full"
                               >
                                 <span className="truncate block">
-                                  {supplier.person.fullName} - {supplier.type}
+                                  {supplier.person.fullName}
                                 </span>
                               </SelectItem>
                             ))}

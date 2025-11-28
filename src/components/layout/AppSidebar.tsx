@@ -1,6 +1,5 @@
 import {
   Home,
-  Command,
   Users,
   Contact,
   Package,
@@ -47,8 +46,12 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link to="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+                  <img
+                    src="/logo.png"
+                    alt="WareSync Logo"
+                    className="size-8 object-contain"
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">WareSync</span>

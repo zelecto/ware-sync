@@ -8,9 +8,10 @@ import { contactsService } from "@/services/contacts.service";
 import { productsService } from "@/services/products.service";
 import type { CreateSupplierInboundDto } from "@/services/distributions.service";
 import type { Warehouse } from "@/interface/warehouse";
-import type { Contact } from "@/interface/contact";
+import { ContactType, type Contact } from "@/interface/contact";
 import type { Product } from "@/interface/product";
 import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
+import { FilterUtils } from "@/lib/filters";
 
 export default function CreateSupplierInbound() {
   const navigate = useNavigate();
@@ -35,14 +36,17 @@ export default function CreateSupplierInbound() {
         const [warehousesResponse, suppliersResponse, productsResponse] =
           await Promise.all([
             warehousesService.findAll({ page: 1, limit: 100 }),
-            contactsService.findAll({ page: 1, limit: 100 }),
+            contactsService.findAll({
+              page: 1,
+              limit: 100,
+              filters: [FilterUtils.equals("type", ContactType.PROVIDER)],
+            }),
             productsService.findAll({ page: 1, limit: 100 }),
           ]);
         setWarehouses(warehousesResponse.data);
         setSuppliers(suppliersResponse.data);
         setProducts(productsResponse.data);
 
-        // Leer parámetros de la URL
         const urlParams = new URLSearchParams(window.location.search);
 
         // Buscar producto por SKU
