@@ -1,13 +1,20 @@
 import type React from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Package,
   Warehouse,
   DollarSign,
   Layers,
   AlertTriangle,
+  Users,
+  Mail,
+  MessageCircle,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import type { Product } from "@/types/product";
 import { unitLabels, type ProductUnit } from "@/types/product";
@@ -26,6 +33,32 @@ export function ProductDetail({ product }: ProductDetailProps) {
     ) ?? [];
 
   const hasLowStockInWarehouses = warehousesWithLowStock.length > 0;
+
+  const getInitials = (fullName: string) => {
+    const names = fullName.trim().split(" ");
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    }
+    return fullName.substring(0, 2).toUpperCase();
+  };
+
+  const handleWhatsApp = (phone: string, name: string) => {
+    const cleanPhone = phone.replace(/\D/g, "");
+    const message = encodeURIComponent(
+      `Hola ${name}, te contacto respecto al producto ${product.name} (SKU: ${product.sku})`
+    );
+    window.open(`https://wa.me/${cleanPhone}?text=${message}`, "_blank");
+  };
+
+  const handleEmail = (email: string, name: string) => {
+    const subject = encodeURIComponent(
+      `Consulta sobre producto: ${product.name}`
+    );
+    const body = encodeURIComponent(
+      `Hola ${name},\n\nTe contacto respecto al producto:\n- Nombre: ${product.name}\n- SKU: ${product.sku}\n\n`
+    );
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  };
 
   return (
     <div className="">
@@ -90,6 +123,117 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Suppliers */}
+        {product.suppliers && product.suppliers.length > 0 && (
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Proveedores
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                {product.suppliers.map((item) => (
+                  <Card key={item.id} className="border-2">
+                    <CardContent className="p-4">
+                      <div className="space-y-4">
+                        {/* Header with Avatar */}
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                              {getInitials(item.supplier.person.fullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-base truncate">
+                              {item.supplier.person.fullName}
+                            </h4>
+                            <Badge variant="secondary" className="text-xs mt-1">
+                              Proveedor
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Contact Information */}
+                        <div className="space-y-2">
+                          {item.supplier.person.email && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <span className="text-muted-foreground truncate">
+                                {item.supplier.person.email}
+                              </span>
+                            </div>
+                          )}
+
+                          {item.supplier.person.phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <span className="text-muted-foreground">
+                                {item.supplier.person.phone}
+                              </span>
+                            </div>
+                          )}
+
+                          {item.supplier.person.address && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <span className="text-muted-foreground truncate">
+                                {item.supplier.person.address}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 pt-2 border-t">
+                          {item.supplier.person.phone && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (item.supplier.person.phone) {
+                                  handleWhatsApp(
+                                    item.supplier.person.phone,
+                                    item.supplier.person.fullName
+                                  );
+                                }
+                              }}
+                              className="flex-1"
+                            >
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              WhatsApp
+                            </Button>
+                          )}
+
+                          {item.supplier.person.email && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (item.supplier.person.email) {
+                                  handleEmail(
+                                    item.supplier.person.email,
+                                    item.supplier.person.fullName
+                                  );
+                                }
+                              }}
+                              className="flex-1"
+                            >
+                              <Mail className="h-4 w-4 mr-2" />
+                              Email
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Warehouses */}
         {product.warehouses && product.warehouses.length > 0 && (

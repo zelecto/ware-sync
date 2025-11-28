@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ProductAutocomplete } from "@/components/ui/product-autocomplete";
 import type { CreateSupplierInboundDto } from "@/services/distributions.service";
 import type { Warehouse } from "@/interface/warehouse";
 import type { Contact } from "@/interface/contact";
@@ -223,37 +224,17 @@ export function SupplierInboundForm({
                               <Field name={`details.${index}.productId`}>
                                 {({ field }: FieldProps) => (
                                   <div className="flex-1 space-y-1">
-                                    <Select
-                                      value={field.value || undefined}
-                                      onValueChange={(value) =>
+                                    <ProductAutocomplete
+                                      products={availableProductsForThisField}
+                                      value={field.value}
+                                      onChange={(value) =>
                                         setFieldValue(
                                           `details.${index}.productId`,
                                           value
                                         )
                                       }
-                                    >
-                                      <SelectTrigger className="h-9 overflow-hidden">
-                                        <SelectValue
-                                          placeholder="Seleccione producto"
-                                          className="truncate"
-                                        />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {availableProductsForThisField.map(
-                                          (product) => (
-                                            <SelectItem
-                                              key={product.id}
-                                              value={product.id}
-                                              className="max-w-full"
-                                            >
-                                              <span className="truncate block">
-                                                {product.name} ({product.sku})
-                                              </span>
-                                            </SelectItem>
-                                          )
-                                        )}
-                                      </SelectContent>
-                                    </Select>
+                                      placeholder="Buscar por código o nombre..."
+                                    />
                                   </div>
                                 )}
                               </Field>

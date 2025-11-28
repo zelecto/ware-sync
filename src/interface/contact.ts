@@ -9,6 +9,4 @@ export interface Contact extends BaseEntity {
 
 export enum ContactType {
   PROVIDER = "PROVIDER",
-  DISTRIBUTOR = "DISTRIBUTOR",
-  CLIENT = "CLIENT",
 }

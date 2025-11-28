@@ -3,16 +3,19 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { ProductForm } from "@/components/product";
 import { productsService } from "@/services/products.service";
-import type { CreateProductDto } from "@/services/products.service";
+import type {
+  CreateProductDto,
+  UpdateProductDto,
+} from "@/services/products.service";
 
 export default function CreateProduct() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (values: CreateProductDto) => {
+  const handleSubmit = async (values: CreateProductDto | UpdateProductDto) => {
     try {
       setLoading(true);
-      await productsService.create(values);
+      await productsService.create(values as CreateProductDto);
       toast.success("Producto creado exitosamente");
       navigate("/products");
     } catch (error: any) {
@@ -32,9 +35,7 @@ export default function CreateProduct() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Crear Producto</h1>
-      </div>
+      <div className="mb-6"></div>
       <ProductForm
         onSubmit={handleSubmit}
         onCancel={handleCancel}

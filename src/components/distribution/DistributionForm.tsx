@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ProductAutocomplete } from "@/components/ui/product-autocomplete";
 import type { CreateWarehouseTransferDto } from "@/services/distributions.service";
 import type { Warehouse } from "@/interface/warehouse";
 import type { Contact } from "@/interface/contact";
@@ -271,49 +272,20 @@ export function DistributionForm({
                               <Field name={`details.${index}.productId`}>
                                 {({ field }: FieldProps) => (
                                   <div className="flex-1 space-y-1">
-                                    <Select
-                                      value={field.value || undefined}
-                                      onValueChange={(value) =>
+                                    <ProductAutocomplete
+                                      products={availableProductsForThisField}
+                                      value={field.value}
+                                      onChange={(value) =>
                                         setFieldValue(
                                           `details.${index}.productId`,
                                           value
                                         )
                                       }
+                                      placeholder="Buscar por código o nombre..."
                                       disabled={!values.originWarehouseId}
-                                    >
-                                      <SelectTrigger className="h-9 overflow-hidden">
-                                        <SelectValue
-                                          placeholder="Seleccione producto"
-                                          className="truncate"
-                                        />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {availableProductsForThisField.map(
-                                          (product) => {
-                                            const warehouseProduct =
-                                              product.warehouses?.find(
-                                                (wp) =>
-                                                  wp.warehouseId ===
-                                                  values.originWarehouseId
-                                              );
-                                            return (
-                                              <SelectItem
-                                                key={product.id}
-                                                value={product.id}
-                                                className="max-w-full"
-                                              >
-                                                <span className="truncate block">
-                                                  {product.name} ({product.sku}){" "}
-                                                  - Stock:{" "}
-                                                  {warehouseProduct?.quantity ||
-                                                    0}
-                                                </span>
-                                              </SelectItem>
-                                            );
-                                          }
-                                        )}
-                                      </SelectContent>
-                                    </Select>
+                                      showStock={true}
+                                      warehouseId={values.originWarehouseId}
+                                    />
                                     {field.value && stock > 0 && (
                                       <p className="text-xs text-muted-foreground">
                                         Stock disponible: {stock}

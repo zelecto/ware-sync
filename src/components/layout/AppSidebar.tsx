@@ -26,7 +26,7 @@ import { NavUser } from "./NavUser";
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Usuarios", url: "/users", icon: Users },
-  { title: "Contactos", url: "/contacts", icon: Contact },
+  { title: "Proveedores", url: "/contacts", icon: Contact },
   { title: "Productos", url: "/products", icon: Package },
   { title: "Almacenes", url: "/warehouses", icon: Warehouse },
   { title: "Transferencias", url: "/distributions", icon: Truck },

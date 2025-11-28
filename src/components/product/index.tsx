@@ -2,3 +2,4 @@ export { ProductTable } from "./Table";
 export { ProductForm } from "./ProductForm";
 export { WarehouseStockManager } from "./WarehouseStockManager";
 export { ProductDetail } from "./ProductDetail";
+export { SupplierSelector } from "./SupplierSelector";

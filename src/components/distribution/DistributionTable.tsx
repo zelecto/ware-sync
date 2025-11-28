@@ -78,10 +78,10 @@ export function DistributionTable({
                   <TableCell>
                     <div>
                       <div className="font-medium">
-                        {distribution.originWarehouse.name}
+                        {distribution.originWarehouse?.name}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {distribution.originWarehouse.city}
+                        {distribution.originWarehouse?.city}
                       </div>
                     </div>
                   </TableCell>

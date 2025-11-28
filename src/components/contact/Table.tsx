@@ -10,14 +10,12 @@ import { FilterUtils } from "@/lib/filters";
 import toast from "react-hot-toast";
 
 interface ContactTableProps {
-  filter: "ALL" | ContactType;
   onEdit: (contact: Contact) => void;
   searchInput: string;
   onSearchChange: (value: string) => void;
 }
 
 export function ContactTable({
-  filter,
   onEdit,
   searchInput,
   onSearchChange,
@@ -47,13 +45,6 @@ export function ContactTable({
     }, 500);
     return () => clearTimeout(timer);
   }, [searchInput, updateSearch]);
-
-  useEffect(() => {
-    removeFilter("type");
-    if (filter !== "ALL") {
-      addFilter(FilterUtils.equals("type", filter));
-    }
-  }, [filter]);
 
   const loadContacts = async () => {
     try {
@@ -92,20 +83,8 @@ export function ContactTable({
     }
   };
 
-  const getContactTypeBadge = (type: ContactType) => {
-    const variants: Record<ContactType, "default" | "secondary" | "outline"> = {
-      [ContactType.PROVIDER]: "default",
-      [ContactType.DISTRIBUTOR]: "secondary",
-      [ContactType.CLIENT]: "outline",
-    };
-
-    const labels: Record<ContactType, string> = {
-      [ContactType.PROVIDER]: "Proveedor",
-      [ContactType.DISTRIBUTOR]: "Distribuidor",
-      [ContactType.CLIENT]: "Cliente",
-    };
-
-    return <Badge variant={variants[type]}>{labels[type]}</Badge>;
+  const getContactTypeBadge = () => {
+    return <Badge variant="default">Proveedor</Badge>;
   };
 
   if (error) {
@@ -136,7 +115,7 @@ export function ContactTable({
     {
       key: "type",
       header: "Tipo",
-      render: (contact: Contact) => getContactTypeBadge(contact.type),
+      render: () => getContactTypeBadge(),
     },
     {
       key: "actions",

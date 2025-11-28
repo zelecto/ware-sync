@@ -26,11 +26,7 @@ const contactSchema = z.object({
     .min(1, "El correo es requerido")
     .email("El correo electrónico no es válido"),
   address: z.string().optional(),
-  type: z.enum([
-    ContactType.PROVIDER,
-    ContactType.DISTRIBUTOR,
-    ContactType.CLIENT,
-  ]),
+  type: z.enum([ContactType.PROVIDER]),
 });
 
 type ContactFormValues = z.infer<typeof contactSchema>;
@@ -58,7 +54,7 @@ export function ContactForm({
     phone: contact?.person.phone || "",
     email: contact?.person.email || "",
     address: contact?.person.address || "",
-    type: contact?.type || ContactType.CLIENT,
+    type: ContactType.PROVIDER,
   };
 
   const validate = (values: ContactFormValues) => {
@@ -196,29 +192,6 @@ export function ContactForm({
                   </div>
                 )}
               </Field>
-
-              <div className="space-y-2">
-                <Label htmlFor="type">
-                  Tipo <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={values.type}
-                  onValueChange={(value) => setFieldValue("type", value)}
-                >
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Selecciona un tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={ContactType.CLIENT}>Cliente</SelectItem>
-                    <SelectItem value={ContactType.PROVIDER}>
-                      Proveedor
-                    </SelectItem>
-                    <SelectItem value={ContactType.DISTRIBUTOR}>
-                      Distribuidor
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               <div className="flex justify-end gap-4 pt-4">
                 <Button

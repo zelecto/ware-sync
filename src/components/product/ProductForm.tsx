@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import {
   Select,
   SelectContent,
@@ -20,6 +22,7 @@ import type {
 import { warehousesService } from "@/services/warehouses.service";
 import type { Warehouse } from "@/interface/warehouse";
 import { WarehouseStockManager } from "./WarehouseStockManager";
+import { SupplierSelector } from "./SupplierSelector";
 
 interface WarehouseStock {
   warehouseId: string;
@@ -41,6 +44,7 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema> & {
   warehouseStocks: WarehouseStock[];
+  supplierIds: string[];
 };
 
 interface ProductFormProps {
@@ -92,6 +96,9 @@ export function ProductForm({
           initialQuantity: w.quantity,
         }))
       : [],
+    supplierIds: product?.suppliers
+      ? product.suppliers.map((s) => s.supplierId)
+      : [],
   };
 
   const validate = (values: ProductFormValues) => {
@@ -112,6 +119,13 @@ export function ProductForm({
       errors.warehouseStocks = "Debes agregar al menos un almacén";
     }
 
+    const validSupplierIds = values.supplierIds.filter(
+      (id) => id != null && id !== ""
+    );
+    if (validSupplierIds.length === 0) {
+      errors.supplierIds = "Debes agregar al menos un proveedor";
+    }
+
     return errors;
   };
 
@@ -128,6 +142,7 @@ export function ProductForm({
         warehouseId: ws.warehouseId,
         initialQuantity: ws.initialQuantity,
       })),
+      supplierIds: values.supplierIds.filter((id) => id != null && id !== ""),
     };
     await onSubmit(submitData);
   };
@@ -141,189 +156,316 @@ export function ProductForm({
     >
       {({ errors, touched, setFieldValue, values }) => (
         <Form>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <Card className="lg:col-span-4">
+          <div className="mx-auto max-w-5xl space-y-6">
+            {/* Main Product Information */}
+            <Card>
               <CardHeader>
-                <h2 className="text-lg font-semibold">
-                  {isEditMode ? "Editar Producto" : "Información del Producto"}
-                </h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Información General</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1.5">
+                      Datos básicos del producto
+                    </p>
+                  </div>
+                  {isEditMode && (
+                    <Badge variant="outline" className="text-xs">
+                      Editando
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <Field name="sku">
-                  {({ field }: FieldProps) => (
-                    <div className="space-y-2">
-                      <Label htmlFor="sku">
-                        SKU <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        {...field}
-                        id="sku"
-                        placeholder="PROD-001"
-                        className={
-                          errors.sku && touched.sku ? "border-red-500" : ""
-                        }
-                      />
-                      {errors.sku && touched.sku && (
-                        <p className="text-sm text-red-500">{errors.sku}</p>
-                      )}
-                    </div>
-                  )}
-                </Field>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* SKU Field */}
+                  <Field name="sku">
+                    {({ field }: FieldProps) => (
+                      <div className="space-y-2">
+                        <Label htmlFor="sku">
+                          Código SKU <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          {...field}
+                          id="sku"
+                          placeholder="Ej: PROD-001"
+                          required
+                          className={
+                            errors.sku && touched.sku
+                              ? "border-destructive"
+                              : ""
+                          }
+                        />
+                        {errors.sku && touched.sku && (
+                          <p className="text-xs text-destructive">
+                            {errors.sku}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                <Field name="name">
-                  {({ field }: FieldProps) => (
-                    <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Nombre <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        {...field}
-                        id="name"
-                        placeholder="Nombre del producto"
-                        className={
-                          errors.name && touched.name ? "border-red-500" : ""
-                        }
-                      />
-                      {errors.name && touched.name && (
-                        <p className="text-sm text-red-500">{errors.name}</p>
-                      )}
-                    </div>
-                  )}
-                </Field>
+                  {/* Name Field */}
+                  <Field name="name">
+                    {({ field }: FieldProps) => (
+                      <div className="space-y-2">
+                        <Label htmlFor="name">
+                          Nombre del Producto{" "}
+                          <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          {...field}
+                          id="name"
+                          placeholder="Nombre completo del producto"
+                          required
+                          className={
+                            errors.name && touched.name
+                              ? "border-destructive"
+                              : ""
+                          }
+                        />
+                        {errors.name && touched.name && (
+                          <p className="text-xs text-destructive">
+                            {errors.name}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                <div className="space-y-2">
-                  <Label htmlFor="unit">Unidad de Medida</Label>
-                  <Select
-                    value={values.unit || ""}
-                    onValueChange={(value) =>
-                      setFieldValue("unit", value || undefined)
-                    }
-                  >
-                    <SelectTrigger id="unit" className="w-full">
-                      <SelectValue placeholder="Selecciona una unidad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={ProductUnit.UNIT}>Unidad</SelectItem>
-                      <SelectItem value={ProductUnit.KG}>Kilogramo</SelectItem>
-                      <SelectItem value={ProductUnit.LITER}>Litro</SelectItem>
-                      <SelectItem value={ProductUnit.METER}>Metro</SelectItem>
-                      <SelectItem value={ProductUnit.BOX}>Caja</SelectItem>
-                      <SelectItem value={ProductUnit.PACK}>Paquete</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {/* Unit Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="unit">Unidad de Medida</Label>
+                    <Select
+                      value={values.unit || ""}
+                      onValueChange={(value) =>
+                        setFieldValue("unit", value || undefined)
+                      }
+                    >
+                      <SelectTrigger id="unit" className="w-full">
+                        <SelectValue placeholder="Selecciona una unidad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={ProductUnit.UNIT}>Unidad</SelectItem>
+                        <SelectItem value={ProductUnit.KG}>
+                          Kilogramo
+                        </SelectItem>
+                        <SelectItem value={ProductUnit.LITER}>Litro</SelectItem>
+                        <SelectItem value={ProductUnit.METER}>Metro</SelectItem>
+                        <SelectItem value={ProductUnit.BOX}>Caja</SelectItem>
+                        <SelectItem value={ProductUnit.PACK}>
+                          Paquete
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Unit Description Field */}
+                  <Field name="unitDescription">
+                    {({ field }: FieldProps) => (
+                      <div className="space-y-2">
+                        <Label htmlFor="unitDescription">
+                          Descripción de Unidad
+                        </Label>
+                        <Input
+                          {...field}
+                          id="unitDescription"
+                          placeholder="Ej: Caja de 12 unidades"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Opcional: detalles adicionales sobre la unidad
+                        </p>
+                      </div>
+                    )}
+                  </Field>
                 </div>
 
-                <Field name="unitDescription">
-                  {({ field }: FieldProps) => (
-                    <div className="space-y-2">
-                      <Label htmlFor="unitDescription">
-                        Descripción de Unidad
-                      </Label>
-                      <Input
-                        {...field}
-                        id="unitDescription"
-                        placeholder="Ej: Caja de 12 unidades"
-                      />
-                    </div>
-                  )}
-                </Field>
+                <Separator className="my-6" />
 
-                <Field name="purchasePrice">
-                  {({ field }: FieldProps) => (
-                    <div className="space-y-2">
-                      <Label htmlFor="purchasePrice">
-                        Precio de Compra <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        {...field}
-                        id="purchasePrice"
-                        placeholder="0.00"
-                        className={
-                          errors.purchasePrice && touched.purchasePrice
-                            ? "border-red-500"
-                            : ""
-                        }
-                      />
-                      {errors.purchasePrice && touched.purchasePrice && (
-                        <p className="text-sm text-red-500">
-                          {errors.purchasePrice}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </Field>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Purchase Price Field */}
+                  <Field name="purchasePrice">
+                    {({ field }: FieldProps) => (
+                      <div className="space-y-2">
+                        <Label htmlFor="purchasePrice">
+                          Precio de Compra{" "}
+                          <span className="text-destructive">*</span>
+                        </Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            $
+                          </span>
+                          <Input
+                            {...field}
+                            id="purchasePrice"
+                            placeholder="0.00"
+                            required
+                            className={`pl-7 ${
+                              errors.purchasePrice && touched.purchasePrice
+                                ? "border-destructive"
+                                : ""
+                            }`}
+                          />
+                        </div>
+                        {errors.purchasePrice && touched.purchasePrice && (
+                          <p className="text-xs text-destructive">
+                            {errors.purchasePrice}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
 
-                <Field name="minStock">
-                  {({ field }: FieldProps) => (
-                    <div className="space-y-2">
-                      <Label htmlFor="minStock">Stock Mínimo</Label>
-                      <Input
-                        {...field}
-                        id="minStock"
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        onChange={(e) =>
-                          setFieldValue(
-                            "minStock",
-                            parseInt(e.target.value) || 0
-                          )
-                        }
-                        className={
-                          errors.minStock && touched.minStock
-                            ? "border-red-500"
-                            : ""
-                        }
-                      />
-                      {errors.minStock && touched.minStock && (
-                        <p className="text-sm text-red-500">
-                          {errors.minStock}
+                  {/* Min Stock Field */}
+                  <Field name="minStock">
+                    {({ field }: FieldProps) => (
+                      <div className="space-y-2">
+                        <Label htmlFor="minStock">Stock Mínimo</Label>
+                        <Input
+                          {...field}
+                          id="minStock"
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          onChange={(e) =>
+                            setFieldValue(
+                              "minStock",
+                              Number.parseInt(e.target.value) || 0
+                            )
+                          }
+                          className={
+                            errors.minStock && touched.minStock
+                              ? "border-destructive"
+                              : ""
+                          }
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Alerta cuando el stock sea menor a este valor
                         </p>
-                      )}
-                    </div>
-                  )}
-                </Field>
+                        {errors.minStock && touched.minStock && (
+                          <p className="text-xs text-destructive">
+                            {errors.minStock}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
+                </div>
               </CardContent>
             </Card>
 
-            <div className="lg:col-span-4">
-              <WarehouseStockManager
-                warehouses={warehouses}
-                warehouseStocks={values.warehouseStocks}
-                onAddWarehouse={(warehouseId, quantity) => {
-                  setFieldValue("warehouseStocks", [
-                    ...values.warehouseStocks,
-                    { warehouseId, initialQuantity: quantity },
-                  ]);
-                }}
-                onRemoveWarehouse={(warehouseId) => {
-                  setFieldValue(
-                    "warehouseStocks",
-                    values.warehouseStocks.filter(
-                      (ws) => ws.warehouseId !== warehouseId
-                    )
-                  );
-                }}
-                onUpdateQuantity={(warehouseId, quantity) => {
-                  setFieldValue(
-                    "warehouseStocks",
-                    values.warehouseStocks.map((ws) =>
-                      ws.warehouseId === warehouseId
-                        ? { ...ws, initialQuantity: quantity }
-                        : ws
-                    )
-                  );
-                }}
-                loadingWarehouses={loadingWarehouses}
-                error={
-                  values.warehouseStocks.length === 0 && touched.warehouseStocks
-                    ? "Debes agregar al menos un almacén"
-                    : undefined
-                }
-                loading={loading}
-                isEditMode={isEditMode}
-                onCancel={onCancel}
-              />
+            {/* Suppliers and Warehouses Grid */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Suppliers Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Proveedores <span className="text-destructive">*</span>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1.5">
+                    Asigna uno o más proveedores
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <SupplierSelector
+                    selectedSupplierIds={values.supplierIds.filter(
+                      (id) => id != null && id !== ""
+                    )}
+                    onAddSupplier={(supplierId) => {
+                      if (supplierId && supplierId.trim() !== "") {
+                        setFieldValue("supplierIds", [
+                          ...values.supplierIds.filter(
+                            (id) => id != null && id !== ""
+                          ),
+                          supplierId,
+                        ]);
+                      }
+                    }}
+                    onRemoveSupplier={(supplierId) => {
+                      setFieldValue(
+                        "supplierIds",
+                        values.supplierIds.filter(
+                          (id) => id !== supplierId && id != null && id !== ""
+                        )
+                      );
+                    }}
+                    error={
+                      values.supplierIds.filter((id) => id != null && id !== "")
+                        .length === 0 && touched.supplierIds
+                        ? "Debes agregar al menos un proveedor"
+                        : undefined
+                    }
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Warehouses Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Almacenes <span className="text-destructive">*</span>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1.5">
+                    Define el stock inicial por almacén
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <WarehouseStockManager
+                    warehouses={warehouses}
+                    warehouseStocks={values.warehouseStocks}
+                    onAddWarehouse={(warehouseId, quantity) => {
+                      setFieldValue("warehouseStocks", [
+                        ...values.warehouseStocks,
+                        { warehouseId, initialQuantity: quantity },
+                      ]);
+                    }}
+                    onRemoveWarehouse={(warehouseId) => {
+                      setFieldValue(
+                        "warehouseStocks",
+                        values.warehouseStocks.filter(
+                          (ws) => ws.warehouseId !== warehouseId
+                        )
+                      );
+                    }}
+                    onUpdateQuantity={(warehouseId, quantity) => {
+                      setFieldValue(
+                        "warehouseStocks",
+                        values.warehouseStocks.map((ws) =>
+                          ws.warehouseId === warehouseId
+                            ? { ...ws, initialQuantity: quantity }
+                            : ws
+                        )
+                      );
+                    }}
+                    loadingWarehouses={loadingWarehouses}
+                    error={
+                      values.warehouseStocks.length === 0 &&
+                      touched.warehouseStocks
+                        ? "Debes agregar al menos un almacén"
+                        : undefined
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex items-center justify-end gap-3 rounded-lg border bg-card p-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <span className="animate-pulse">Guardando...</span>
+                ) : isEditMode ? (
+                  "Actualizar Producto"
+                ) : (
+                  "Crear Producto"
+                )}
+              </Button>
             </div>
           </div>
         </Form>

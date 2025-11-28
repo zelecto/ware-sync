@@ -24,6 +24,7 @@ export interface CreateProductDto {
     warehouseId: string;
     initialQuantity: number;
   }>;
+  supplierIds: string[];
 }
 
 export interface UpdateProductDto {
@@ -39,6 +40,7 @@ export interface UpdateProductDto {
     warehouseId: string;
     initialQuantity: number;
   }>;
+  supplierIds?: string[];
 }
 
 const productFilterConfig = new ProductFilterConfig();

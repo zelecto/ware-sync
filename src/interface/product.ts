@@ -1,4 +1,5 @@
 import type { BaseEntity } from "./base-entity";
+import type { Contact } from "./contact";
 
 export interface Product extends BaseEntity {
   sku: string;
@@ -23,6 +24,12 @@ export interface Product extends BaseEntity {
       createdAt: string;
       updatedAt: string;
     };
+  }>;
+  suppliers?: Array<{
+    id: string;
+    productId: string;
+    supplierId: string;
+    supplier: Contact;
   }>;
 }
 

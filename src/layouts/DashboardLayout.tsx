@@ -29,7 +29,7 @@ const getBreadcrumbs = (
   // Mapeo de rutas a etiquetas legibles
   const routeLabels: Record<string, string> = {
     users: "Usuarios",
-    contacts: "Contactos",
+    contacts: "Proveedores",
     products: "Productos",
     warehouses: "Almacenes",
     distributions: "Transferencias",

@@ -3,16 +3,21 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { WarehouseForm } from "@/components/warehouse";
 import { warehousesService } from "@/services/warehouses.service";
-import type { CreateWarehouseDto } from "@/services/warehouses.service";
+import type {
+  CreateWarehouseDto,
+  UpdateWarehouseDto,
+} from "@/services/warehouses.service";
 
 export default function CreateWarehouse() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (values: CreateWarehouseDto) => {
+  const handleSubmit = async (
+    values: CreateWarehouseDto | UpdateWarehouseDto
+  ) => {
     try {
       setLoading(true);
-      await warehousesService.create(values);
+      await warehousesService.create(values as CreateWarehouseDto);
       toast.success("Almacén creado exitosamente");
       navigate("/warehouses");
     } catch (error: any) {
