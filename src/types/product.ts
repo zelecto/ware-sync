@@ -1,19 +1,19 @@
 export enum ProductUnit {
   UNIT = "UNIT",
-  KG = "KG",
-  LITER = "LITER",
-  METER = "METER",
   BOX = "BOX",
-  PACK = "PACK",
+  PACKAGE = "PACKAGE",
+  BAG = "BAG",
+  LITER = "LITER",
+  KILO = "KILO",
 }
 
 export const unitLabels: Record<ProductUnit, string> = {
   [ProductUnit.UNIT]: "Unidad",
-  [ProductUnit.KG]: "Kilogramo",
-  [ProductUnit.LITER]: "Litro",
-  [ProductUnit.METER]: "Metro",
   [ProductUnit.BOX]: "Caja",
-  [ProductUnit.PACK]: "Paquete",
+  [ProductUnit.PACKAGE]: "Paquete",
+  [ProductUnit.BAG]: "Bolsa",
+  [ProductUnit.LITER]: "Litro",
+  [ProductUnit.KILO]: "Kilogramo",
 };
 
 export type { Product } from "@/interface/product";

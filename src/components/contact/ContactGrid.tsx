@@ -7,6 +7,7 @@ import { ContactCard } from "./ContactCard";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface ContactGridProps {
   onEdit: (contact: Contact) => void;
@@ -19,6 +20,10 @@ export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<any>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    contactId: string | null;
+  }>({ open: false, contactId: null });
 
   const {
     filterParams,
@@ -62,11 +67,15 @@ export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
     loadContacts();
   }, [filterParams]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este contacto?")) return;
+  const handleDelete = (id: string) => {
+    setConfirmDialog({ open: true, contactId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDialog.contactId) return;
 
     try {
-      await contactsService.softDelete(id);
+      await contactsService.softDelete(confirmDialog.contactId);
       toast.success("Contacto eliminado exitosamente");
       loadContacts();
     } catch (err: any) {
@@ -108,50 +117,63 @@ export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {contacts.map((contact) => (
-          <ContactCard
-            key={contact.id}
-            contact={contact}
-            onEdit={onEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {meta && meta.totalPages > 1 && (
-        <div className="flex items-center justify-between border-t pt-4">
-          <div className="text-sm text-muted-foreground">
-            Mostrando {contacts.length} de {meta.total} contactos
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => updatePage(page - 1)}
-              disabled={!meta.hasPreviousPage}
-            >
-              Anterior
-            </Button>
-            <div className="flex items-center gap-2">
-              <span className="text-sm">
-                Página {page} de {meta.totalPages}
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => updatePage(page + 1)}
-              disabled={!meta.hasNextPage}
-            >
-              Siguiente
-            </Button>
-          </div>
+    <>
+      <div className="space-y-6">
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {contacts.map((contact) => (
+            <ContactCard
+              key={contact.id}
+              contact={contact}
+              onEdit={onEdit}
+              onDelete={handleDelete}
+            />
+          ))}
         </div>
-      )}
-    </div>
+
+        {/* Pagination */}
+        {meta && meta.totalPages > 1 && (
+          <div className="flex items-center justify-between border-t pt-4">
+            <div className="text-sm text-muted-foreground">
+              Mostrando {contacts.length} de {meta.total} contactos
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => updatePage(page - 1)}
+                disabled={!meta.hasPreviousPage}
+              >
+                Anterior
+              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-sm">
+                  Página {page} de {meta.totalPages}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => updatePage(page + 1)}
+                disabled={!meta.hasNextPage}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) =>
+          setConfirmDialog({ open, contactId: confirmDialog.contactId })
+        }
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Contacto"
+        description="¿Estás seguro de eliminar este contacto? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        variant="destructive"
+      />
+    </>
   );
 }

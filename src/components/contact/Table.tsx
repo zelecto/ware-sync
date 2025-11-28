@@ -8,6 +8,7 @@ import { contactsService } from "@/services/contacts.service";
 import { useFilters } from "@/hooks/useFilters";
 import { FilterUtils } from "@/lib/filters";
 import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface ContactTableProps {
   onEdit: (contact: Contact) => void;
@@ -24,6 +25,10 @@ export function ContactTable({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<any>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    contactId: string | null;
+  }>({ open: false, contactId: null });
 
   const {
     filterParams,
@@ -67,11 +72,15 @@ export function ContactTable({
     loadContacts();
   }, [filterParams]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este contacto?")) return;
+  const handleDelete = (id: string) => {
+    setConfirmDialog({ open: true, contactId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDialog.contactId) return;
 
     try {
-      await contactsService.softDelete(id);
+      await contactsService.softDelete(confirmDialog.contactId);
       toast.success("Contacto eliminado exitosamente");
       loadContacts();
     } catch (err: any) {
@@ -144,24 +153,37 @@ export function ContactTable({
   ];
 
   return (
-    <DataTable
-      data={contacts}
-      columns={columns}
-      currentPage={page}
-      totalPages={meta?.totalPages || 0}
-      limit={limit}
-      total={meta?.total || 0}
-      hasNextPage={meta?.hasNextPage || false}
-      hasPreviousPage={meta?.hasPreviousPage || false}
-      limitOptions={[5, 10, 25, 50]}
-      onPageChange={updatePage}
-      onLimitChange={updateLimit}
-      isLoading={loading}
-      emptyMessage={
-        searchInput
-          ? "No se encontraron contactos con ese criterio de búsqueda"
-          : "No hay contactos para mostrar"
-      }
-    />
+    <>
+      <DataTable
+        data={contacts}
+        columns={columns}
+        currentPage={page}
+        totalPages={meta?.totalPages || 0}
+        limit={limit}
+        total={meta?.total || 0}
+        hasNextPage={meta?.hasNextPage || false}
+        hasPreviousPage={meta?.hasPreviousPage || false}
+        limitOptions={[5, 10, 25, 50]}
+        onPageChange={updatePage}
+        onLimitChange={updateLimit}
+        isLoading={loading}
+        emptyMessage={
+          searchInput
+            ? "No se encontraron contactos con ese criterio de búsqueda"
+            : "No hay contactos para mostrar"
+        }
+      />
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) =>
+          setConfirmDialog({ open, contactId: confirmDialog.contactId })
+        }
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Contacto"
+        description="¿Estás seguro de eliminar este contacto? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        variant="destructive"
+      />
+    </>
   );
 }

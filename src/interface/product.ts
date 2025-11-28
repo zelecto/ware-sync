@@ -27,17 +27,15 @@ export interface Product extends BaseEntity {
   }>;
   suppliers?: Array<{
     id: string;
-    productId: string;
-    supplierId: string;
     supplier: Contact;
   }>;
 }
 
 export enum ProductUnit {
   UNIT = "UNIT",
-  KG = "KG",
-  LITER = "LITER",
-  METER = "METER",
   BOX = "BOX",
-  PACK = "PACK",
+  PACKAGE = "PACKAGE",
+  BAG = "BAG",
+  LITER = "LITER",
+  KILO = "KILO",
 }

@@ -97,7 +97,7 @@ export function ProductForm({
         }))
       : [],
     supplierIds: product?.suppliers
-      ? product.suppliers.map((s) => s.supplierId)
+      ? product.suppliers.map((s) => s.supplier.id)
       : [],
   };
 
@@ -245,14 +245,14 @@ export function ProductForm({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value={ProductUnit.UNIT}>Unidad</SelectItem>
-                        <SelectItem value={ProductUnit.KG}>
-                          Kilogramo
-                        </SelectItem>
-                        <SelectItem value={ProductUnit.LITER}>Litro</SelectItem>
-                        <SelectItem value={ProductUnit.METER}>Metro</SelectItem>
                         <SelectItem value={ProductUnit.BOX}>Caja</SelectItem>
-                        <SelectItem value={ProductUnit.PACK}>
+                        <SelectItem value={ProductUnit.PACKAGE}>
                           Paquete
+                        </SelectItem>
+                        <SelectItem value={ProductUnit.BAG}>Bolsa</SelectItem>
+                        <SelectItem value={ProductUnit.LITER}>Litro</SelectItem>
+                        <SelectItem value={ProductUnit.KILO}>
+                          Kilogramo
                         </SelectItem>
                       </SelectContent>
                     </Select>

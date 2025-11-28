@@ -8,6 +8,8 @@ import type { Product } from "@/interface/product";
 import { Badge } from "../ui/badge";
 import { productsService } from "@/services/products.service";
 import { useFilters } from "@/hooks/useFilters";
+import { unitLabels, type ProductUnit } from "@/types/product";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface ProductTableProps {
   onEdit: (product: Product) => void;
@@ -25,6 +27,10 @@ export function ProductTable({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<any>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    productId: string | null;
+  }>({ open: false, productId: null });
 
   const { filterParams, updateSearch, updatePage, updateLimit, page, limit } =
     useFilters({
@@ -60,11 +66,15 @@ export function ProductTable({
     loadProducts();
   }, [filterParams]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este producto?")) return;
+  const handleDelete = (id: string) => {
+    setConfirmDialog({ open: true, productId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDialog.productId) return;
 
     try {
-      await productsService.remove(id);
+      await productsService.remove(confirmDialog.productId);
       toast.success("Producto eliminado exitosamente");
       loadProducts();
     } catch (err: any) {
@@ -100,7 +110,7 @@ export function ProductTable({
       header: "Unidad",
       render: (product: Product) => (
         <>
-          {product.unit || "N/A"}
+          {product.unit ? unitLabels[product.unit as ProductUnit] : "N/A"}
           {product.unitDescription && ` (${product.unitDescription})`}
         </>
       ),
@@ -159,24 +169,37 @@ export function ProductTable({
   ];
 
   return (
-    <DataTable
-      data={products}
-      columns={columns}
-      currentPage={page}
-      totalPages={meta?.totalPages || 0}
-      limit={limit}
-      total={meta?.total || 0}
-      hasNextPage={meta?.hasNextPage || false}
-      hasPreviousPage={meta?.hasPreviousPage || false}
-      limitOptions={[5, 10, 25, 50]}
-      onPageChange={updatePage}
-      onLimitChange={updateLimit}
-      isLoading={loading}
-      emptyMessage={
-        searchInput
-          ? "No se encontraron productos con ese criterio de búsqueda"
-          : "No hay productos registrados"
-      }
-    />
+    <>
+      <DataTable
+        data={products}
+        columns={columns}
+        currentPage={page}
+        totalPages={meta?.totalPages || 0}
+        limit={limit}
+        total={meta?.total || 0}
+        hasNextPage={meta?.hasNextPage || false}
+        hasPreviousPage={meta?.hasPreviousPage || false}
+        limitOptions={[5, 10, 25, 50]}
+        onPageChange={updatePage}
+        onLimitChange={updateLimit}
+        isLoading={loading}
+        emptyMessage={
+          searchInput
+            ? "No se encontraron productos con ese criterio de búsqueda"
+            : "No hay productos registrados"
+        }
+      />
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) =>
+          setConfirmDialog({ open, productId: confirmDialog.productId })
+        }
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Producto"
+        description="¿Estás seguro de eliminar este producto? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        variant="destructive"
+      />
+    </>
   );
 }

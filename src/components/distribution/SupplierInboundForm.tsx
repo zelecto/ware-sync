@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductAutocomplete } from "@/components/ui/product-autocomplete";
+import { SupplierAutocomplete } from "@/components/ui/supplier-autocomplete";
 import type { CreateSupplierInboundDto } from "@/services/distributions.service";
 import type { Warehouse } from "@/interface/warehouse";
 import type { Contact } from "@/interface/contact";
@@ -90,7 +91,19 @@ export function SupplierInboundForm({
           const selectedProductIds = values.details
             .map((d, i) => (i !== currentIndex ? d.productId : null))
             .filter(Boolean);
-          return products.filter((p) => !selectedProductIds.includes(p.id));
+
+          // Filtrar productos por proveedor seleccionado
+          let filteredProducts = products;
+          if (values.supplierId) {
+            filteredProducts = products.filter((p) =>
+              p.suppliers?.some((s) => s.supplier.id === values.supplierId)
+            );
+          }
+
+          // Excluir productos ya seleccionados en otros campos
+          return filteredProducts.filter(
+            (p) => !selectedProductIds.includes(p.id)
+          );
         };
 
         return (
@@ -112,38 +125,23 @@ export function SupplierInboundForm({
                         <Label htmlFor="supplierId">
                           Proveedor <span className="text-red-500">*</span>
                         </Label>
-                        <Select
+                        <SupplierAutocomplete
+                          suppliers={suppliers}
                           value={field.value}
-                          onValueChange={(value) =>
-                            setFieldValue("supplierId", value)
+                          onChange={(value) => {
+                            setFieldValue("supplierId", value);
+                            // Limpiar productos seleccionados al cambiar de proveedor
+                            setFieldValue("details", [
+                              { productId: "", amount: 1 },
+                            ]);
+                          }}
+                          placeholder="Buscar proveedor..."
+                          className={
+                            errors.supplierId && touched.supplierId
+                              ? "[&>input]:border-red-500"
+                              : ""
                           }
-                        >
-                          <SelectTrigger
-                            className={`overflow-hidden max-w-56 ${
-                              errors.supplierId && touched.supplierId
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                          >
-                            <SelectValue
-                              placeholder="Seleccione proveedor"
-                              className="truncate"
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {suppliers.map((supplier) => (
-                              <SelectItem
-                                key={supplier.id}
-                                value={supplier.id}
-                                className="max-w-full"
-                              >
-                                <span className="truncate block">
-                                  {supplier.person.fullName}
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        />
                         {errors.supplierId && touched.supplierId && (
                           <p className="text-sm text-red-500">
                             {errors.supplierId}
@@ -208,6 +206,11 @@ export function SupplierInboundForm({
                   <Label>
                     Productos <span className="text-red-500">*</span>
                   </Label>
+                  {!values.supplierId && (
+                    <p className="text-sm text-muted-foreground">
+                      Seleccione un proveedor para ver sus productos
+                    </p>
+                  )}
                   <FieldArray name="details">
                     {({ push, remove }) => (
                       <div className="space-y-2">
@@ -232,7 +235,12 @@ export function SupplierInboundForm({
                                           value
                                         )
                                       }
-                                      placeholder="Buscar por código o nombre..."
+                                      placeholder={
+                                        values.supplierId
+                                          ? "Buscar por código o nombre..."
+                                          : "Seleccione un proveedor primero"
+                                      }
+                                      disabled={!values.supplierId}
                                     />
                                   </div>
                                 )}
@@ -280,6 +288,7 @@ export function SupplierInboundForm({
                           size="sm"
                           onClick={() => push({ productId: "", amount: 1 })}
                           className="w-full"
+                          disabled={!values.supplierId}
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Agregar Producto

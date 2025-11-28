@@ -14,7 +14,6 @@ export default function EditWarehouse() {
   const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
   const [loadingWarehouse, setLoadingWarehouse] = useState(true);
 
-  // Actualizar breadcrumb con el nombre del almacén
   useBreadcrumbItem(warehouse?.name || "Editar");
 
   useEffect(() => {

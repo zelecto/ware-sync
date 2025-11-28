@@ -16,7 +16,6 @@ export default function Edit() {
   const [loadingUser, setLoadingUser] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
-  // Actualizar breadcrumb con el nombre del usuario
   useBreadcrumbItem(user?.person.fullName || "Editar");
 
   useEffect(() => {

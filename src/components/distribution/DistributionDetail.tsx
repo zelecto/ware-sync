@@ -13,6 +13,7 @@ import type { Distribution } from "@/interface/distribution";
 import { DistributionStatus, DistributionType } from "@/interface/distribution";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { formatDate, formatTime, formatDateTime } from "@/lib/date-utils";
+import { unitLabels, type ProductUnit } from "@/types/product";
 
 interface DistributionDetailProps {
   distribution: Distribution;
@@ -188,9 +189,9 @@ export function DistributionDetail({
                     {detail.product.name}
                   </TableCell>
                   <TableCell>
-                    {detail.product.unit ||
-                      detail.product.unitDescription ||
-                      "-"}
+                    {detail.product.unit
+                      ? unitLabels[detail.product.unit as ProductUnit]
+                      : detail.product.unitDescription || "-"}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
                     {detail.amount}

@@ -8,6 +8,7 @@ import { usersService } from "@/services/users.service";
 import { useFilters } from "@/hooks/useFilters";
 import { FilterUtils } from "@/lib/filters";
 import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface UserTableProps {
   filter: "ALL" | UserRole;
@@ -29,6 +30,10 @@ export function UserTable({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<any>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    userId: string | null;
+  }>({ open: false, userId: null });
 
   const {
     filterParams,
@@ -80,11 +85,15 @@ export function UserTable({
     loadUsers();
   }, [filterParams]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
+  const handleDelete = (id: string) => {
+    setConfirmDialog({ open: true, userId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDialog.userId) return;
 
     try {
-      await usersService.softDelete(id);
+      await usersService.softDelete(confirmDialog.userId);
       toast.success("Usuario eliminado exitosamente");
       loadUsers();
     } catch (err: any) {
@@ -157,24 +166,37 @@ export function UserTable({
   ];
 
   return (
-    <DataTable
-      data={users}
-      columns={columns}
-      currentPage={page}
-      totalPages={meta?.totalPages || 0}
-      limit={limit}
-      total={meta?.total || 0}
-      hasNextPage={meta?.hasNextPage || false}
-      hasPreviousPage={meta?.hasPreviousPage || false}
-      limitOptions={[5, 10, 25, 50]}
-      onPageChange={updatePage}
-      onLimitChange={updateLimit}
-      isLoading={loading}
-      emptyMessage={
-        searchInput
-          ? "No se encontraron usuarios con ese criterio de búsqueda"
-          : "No hay usuarios para mostrar"
-      }
-    />
+    <>
+      <DataTable
+        data={users}
+        columns={columns}
+        currentPage={page}
+        totalPages={meta?.totalPages || 0}
+        limit={limit}
+        total={meta?.total || 0}
+        hasNextPage={meta?.hasNextPage || false}
+        hasPreviousPage={meta?.hasPreviousPage || false}
+        limitOptions={[5, 10, 25, 50]}
+        onPageChange={updatePage}
+        onLimitChange={updateLimit}
+        isLoading={loading}
+        emptyMessage={
+          searchInput
+            ? "No se encontraron usuarios con ese criterio de búsqueda"
+            : "No hay usuarios para mostrar"
+        }
+      />
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) =>
+          setConfirmDialog({ open, userId: confirmDialog.userId })
+        }
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Usuario"
+        description="¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        variant="destructive"
+      />
+    </>
   );
 }

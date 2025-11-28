@@ -17,6 +17,7 @@ import ShowProduct from "@/page/Products/Show";
 import Warehouses from "@/page/Warehouses/Index";
 import CreateWarehouse from "@/page/Warehouses/Create";
 import EditWarehouse from "@/page/Warehouses/Edit";
+import ShowWarehouse from "@/page/Warehouses/Show";
 import Distributions from "@/page/Distributions/Index";
 import CreateDistribution from "@/page/Distributions/Create";
 import ShowDistribution from "@/page/Distributions/Show";
@@ -128,6 +129,10 @@ export const router = createBrowserRouter([
           {
             path: "create",
             element: <CreateWarehouse />,
+          },
+          {
+            path: ":id",
+            element: <ShowWarehouse />,
           },
           {
             path: "edit/:id",

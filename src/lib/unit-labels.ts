@@ -2,11 +2,11 @@ import { ProductUnit } from "@/interface/product";
 
 export const UNIT_LABELS: Record<ProductUnit, string> = {
   [ProductUnit.UNIT]: "Unidades",
-  [ProductUnit.KG]: "Kilogramos",
-  [ProductUnit.LITER]: "Litros",
-  [ProductUnit.METER]: "Metros",
   [ProductUnit.BOX]: "Cajas",
-  [ProductUnit.PACK]: "Paquetes",
+  [ProductUnit.PACKAGE]: "Paquetes",
+  [ProductUnit.BAG]: "Bolsas",
+  [ProductUnit.LITER]: "Litros",
+  [ProductUnit.KILO]: "Kilogramos",
 };
 
 export const getUnitLabel = (unit: string): string => {
