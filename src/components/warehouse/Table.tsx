@@ -8,6 +8,7 @@ import type { Warehouse } from "@/interface/warehouse";
 import { warehousesService } from "@/services/warehouses.service";
 import { useFilters } from "@/hooks/useFilters";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WarehouseTableProps {
   onEdit: (warehouse: Warehouse) => void;
@@ -21,6 +22,7 @@ export function WarehouseTable({
   onSearchChange,
 }: WarehouseTableProps) {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,8 @@ export function WarehouseTable({
     open: boolean;
     warehouseId: string | null;
   }>({ open: false, warehouseId: null });
+
+  const canEdit = hasRole(["ADMIN"]);
 
   const { filterParams, updateSearch, updatePage, updateLimit, page, limit } =
     useFilters({
@@ -51,7 +55,7 @@ export function WarehouseTable({
       const response = await warehousesService.findAll(filterParams);
 
       setWarehouses(response.data);
-      setMeta(response.meta);
+      setMeta(response.pagination);
     } catch (err: any) {
       setError(err.message || "Error al cargar almacenes");
       setWarehouses([]);
@@ -117,24 +121,28 @@ export function WarehouseTable({
             onClick={() => navigate(`/warehouses/${warehouse.id}`)}
             title="Ver detalles"
           >
-            <Eye className="w-4 h-4 text-green-600" />
+            <Eye className="w-4 h-4 " />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(warehouse)}
-            title="Editar"
-          >
-            <Pencil className="w-4 h-4 text-blue-600" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(warehouse.id)}
-            title="Eliminar"
-          >
-            <Trash2 className="w-4 h-4 text-red-600" />
-          </Button>
+          {canEdit && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(warehouse)}
+                title="Editar"
+              >
+                <Pencil className="w-4 h-4 text-blue-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(warehouse.id)}
+                title="Eliminar"
+              >
+                <Trash2 className="w-4 h-4 text-red-600" />
+              </Button>
+            </>
+          )}
         </div>
       ),
     },

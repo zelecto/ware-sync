@@ -50,9 +50,9 @@ export function paginateArray<T>(
 ): PaginatedResponse<T> {
   const offset = calculateOffset(page, limit);
   const data = array.slice(offset, offset + limit);
-  const meta = createPaginationMeta(array.length, page, limit);
+  const pagination = createPaginationMeta(array.length, page, limit);
 
-  return { data, meta };
+  return { data, pagination };
 }
 
 /**
@@ -65,7 +65,7 @@ export function normalizePaginatedResponse<T>(
   limit: number
 ): PaginatedResponse<T> {
   // Si ya tiene el formato correcto
-  if (response && response.data && response.meta) {
+  if (response && response.data && response.pagination) {
     return response as PaginatedResponse<T>;
   }
 
@@ -78,6 +78,6 @@ export function normalizePaginatedResponse<T>(
   console.warn("Formato de respuesta desconocido:", response);
   return {
     data: [],
-    meta: createPaginationMeta(0, page, limit),
+    pagination: createPaginationMeta(0, page, limit),
   };
 }

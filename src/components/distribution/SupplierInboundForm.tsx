@@ -92,7 +92,6 @@ export function SupplierInboundForm({
             .map((d, i) => (i !== currentIndex ? d.productId : null))
             .filter(Boolean);
 
-          // Filtrar productos por proveedor seleccionado
           let filteredProducts = products;
           if (values.supplierId) {
             filteredProducts = products.filter((p) =>
@@ -100,7 +99,6 @@ export function SupplierInboundForm({
             );
           }
 
-          // Excluir productos ya seleccionados en otros campos
           return filteredProducts.filter(
             (p) => !selectedProductIds.includes(p.id)
           );
@@ -130,7 +128,6 @@ export function SupplierInboundForm({
                           value={field.value}
                           onChange={(value) => {
                             setFieldValue("supplierId", value);
-                            // Limpiar productos seleccionados al cambiar de proveedor
                             setFieldValue("details", [
                               { productId: "", amount: 1 },
                             ]);
@@ -165,7 +162,7 @@ export function SupplierInboundForm({
                           }
                         >
                           <SelectTrigger
-                            className={`overflow-hidden max-w-56 ${
+                            className={`overflow-hidden w-full max-w-56 ${
                               errors.destinationWarehouseId &&
                               touched.destinationWarehouseId
                                 ? "border-red-500"

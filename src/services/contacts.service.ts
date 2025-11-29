@@ -79,6 +79,30 @@ export const contactsService = {
     }
   },
 
+  async findByProductId(
+    productId: string,
+    params: PaginationParams | FilterParams
+  ): Promise<PaginatedResponse<Contact>> {
+    try {
+      let queryString: string;
+
+      if ("filters" in params || "search" in params || "sortBy" in params) {
+        queryString = QueryStringBuilder.fromFilterParams(
+          params as FilterParams,
+          contactFilterConfig
+        );
+      } else {
+        queryString = createPaginationQueryParams(params as PaginationParams);
+      }
+
+      return await apiClient.get<PaginatedResponse<Contact>>(
+        `/contacts?productId=${productId}&${queryString}`
+      );
+    } catch (error) {
+      handleApiError(error);
+    }
+  },
+
   async findAllWithDeletedPaginated(
     params: PaginationParams
   ): Promise<PaginatedResponse<Contact>> {

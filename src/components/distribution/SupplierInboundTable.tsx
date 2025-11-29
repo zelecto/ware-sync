@@ -12,6 +12,7 @@ import type { Distribution } from "@/interface/distribution";
 import { DistributionStatus } from "@/interface/distribution";
 import { Eye, CheckCircle, XCircle } from "lucide-react";
 import { formatDateTime } from "@/lib/date-utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SupplierInboundTableProps {
   distributions: Distribution[];
@@ -45,6 +46,9 @@ export function SupplierInboundTable({
   onComplete,
   onCancel,
 }: SupplierInboundTableProps) {
+  const { hasRole } = useAuth();
+  const canEdit = hasRole(["ADMIN"]);
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -129,26 +133,27 @@ export function SupplierInboundTable({
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {distribution.status === DistributionStatus.PENDING && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onComplete(distribution.id)}
-                            title="Completar entrada"
-                          >
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onCancel(distribution.id)}
-                            title="Cancelar"
-                          >
-                            <XCircle className="h-4 w-4 text-orange-600" />
-                          </Button>
-                        </>
-                      )}
+                      {canEdit &&
+                        distribution.status === DistributionStatus.PENDING && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onComplete(distribution.id)}
+                              title="Completar entrada"
+                            >
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onCancel(distribution.id)}
+                              title="Cancelar"
+                            >
+                              <XCircle className="h-4 w-4 text-orange-600" />
+                            </Button>
+                          </>
+                        )}
                     </div>
                   </TableCell>
                 </TableRow>

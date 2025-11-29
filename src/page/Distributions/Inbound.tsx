@@ -12,9 +12,12 @@ import toast from "react-hot-toast";
 import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
 import { usePagination } from "@/hooks/usePagination";
 import { handlePaginatedResponse } from "@/lib/pagination-helper";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SupplierInbound() {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
+  const canCreate = hasRole(["ADMIN", "WORKER"]);
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -124,10 +127,12 @@ export default function SupplierInbound() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Entradas desde Proveedores</h1>
-        <Button onClick={() => navigate("/distributions/inbound/create")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva Entrada
-        </Button>
+        {canCreate && (
+          <Button onClick={() => navigate("/distributions/inbound/create")}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nueva Entrada
+          </Button>
+        )}
       </div>
 
       <Card>

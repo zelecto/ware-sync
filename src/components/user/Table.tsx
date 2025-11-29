@@ -9,6 +9,7 @@ import { useFilters } from "@/hooks/useFilters";
 import { FilterUtils } from "@/lib/filters";
 import toast from "react-hot-toast";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface UserTableProps {
   filter: "ALL" | UserRole;
@@ -26,6 +27,7 @@ export function UserTable({
   searchInput,
   onSearchChange,
 }: UserTableInternalProps) {
+  const { hasRole } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,8 @@ export function UserTable({
     open: boolean;
     userId: string | null;
   }>({ open: false, userId: null });
+
+  const canEdit = hasRole(["ADMIN"]);
 
   const {
     filterParams,
@@ -72,7 +76,7 @@ export function UserTable({
       const response = await usersService.findAll(filterParams);
 
       setUsers(response.data);
-      setMeta(response.meta);
+      setMeta(response.pagination);
     } catch (err: any) {
       setError(err.message || "Error al cargar usuarios");
       setUsers([]);
@@ -152,22 +156,26 @@ export function UserTable({
       header: "Acciones",
       render: (user: User) => (
         <div className="flex justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(user)}
-            title="Editar"
-          >
-            <Pencil className="w-4 h-4 text-blue-600" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(user.personId)}
-            title="Eliminar"
-          >
-            <Trash2 className="w-4 h-4 text-red-600" />
-          </Button>
+          {canEdit && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(user)}
+                title="Editar"
+              >
+                <Pencil className="w-4 h-4 text-blue-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(user.personId)}
+                title="Eliminar"
+              >
+                <Trash2 className="w-4 h-4 text-red-600" />
+              </Button>
+            </>
+          )}
         </div>
       ),
     },

@@ -8,14 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ContactGridProps {
   onEdit: (contact: Contact) => void;
   searchInput: string;
   onSearchChange: (value: string) => void;
+  productId?: string;
 }
 
-export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
+export function ContactGrid({
+  onEdit,
+  searchInput,
+  productId,
+}: ContactGridProps) {
+  const { hasRole } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +31,8 @@ export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
     open: boolean;
     contactId: string | null;
   }>({ open: false, contactId: null });
+
+  const canEdit = hasRole(["ADMIN"]);
 
   const {
     filterParams,
@@ -51,10 +60,12 @@ export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
       setLoading(true);
       setError(null);
 
-      const response = await contactsService.findAll(filterParams);
+      const response = productId
+        ? await contactsService.findByProductId(productId, filterParams)
+        : await contactsService.findAll(filterParams);
 
       setContacts(response.data);
-      setMeta(response.meta);
+      setMeta(response.pagination);
     } catch (err: any) {
       setError(err.message || "Error al cargar contactos");
       setContacts([]);
@@ -65,7 +76,7 @@ export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
 
   useEffect(() => {
     loadContacts();
-  }, [filterParams]);
+  }, [filterParams, productId]);
 
   const handleDelete = (id: string) => {
     setConfirmDialog({ open: true, contactId: id });
@@ -125,8 +136,8 @@ export function ContactGrid({ onEdit, searchInput }: ContactGridProps) {
             <ContactCard
               key={contact.id}
               contact={contact}
-              onEdit={onEdit}
-              onDelete={handleDelete}
+              onEdit={canEdit ? onEdit : undefined}
+              onDelete={canEdit ? handleDelete : undefined}
             />
           ))}
         </div>

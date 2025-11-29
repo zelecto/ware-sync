@@ -9,12 +9,12 @@ export function handlePaginatedResponse<T>(
   response: any,
   page: number,
   limit: number
-): { data: T[]; meta: PaginationMeta | undefined } {
+): { data: T[]; pagination: PaginationMeta | undefined } {
   // Si la respuesta es null o undefined
   if (!response) {
     return {
       data: [],
-      meta: createPaginationMeta(0, page, limit),
+      pagination: createPaginationMeta(0, page, limit),
     };
   }
 
@@ -26,19 +26,7 @@ export function handlePaginatedResponse<T>(
   ) {
     return {
       data: response.data || [],
-      meta: response.pagination, // El backend usa "pagination" en lugar de "meta"
-    };
-  }
-
-  // Si tiene el formato { data, meta }
-  if (
-    typeof response === "object" &&
-    "data" in response &&
-    "meta" in response
-  ) {
-    return {
-      data: response.data || [],
-      meta: response.meta,
+      pagination: response.pagination,
     };
   }
 
@@ -46,7 +34,7 @@ export function handlePaginatedResponse<T>(
   if (Array.isArray(response)) {
     return {
       data: response,
-      meta: createPaginationMeta(response.length, page, limit),
+      pagination: createPaginationMeta(response.length, page, limit),
     };
   }
 
@@ -54,6 +42,6 @@ export function handlePaginatedResponse<T>(
   console.warn("Formato de respuesta desconocido:", response);
   return {
     data: [],
-    meta: createPaginationMeta(0, page, limit),
+    pagination: createPaginationMeta(0, page, limit),
   };
 }

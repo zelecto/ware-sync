@@ -9,18 +9,22 @@ import { useFilters } from "@/hooks/useFilters";
 import { FilterUtils } from "@/lib/filters";
 import toast from "react-hot-toast";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ContactTableProps {
   onEdit: (contact: Contact) => void;
   searchInput: string;
   onSearchChange: (value: string) => void;
+  productId?: string;
 }
 
 export function ContactTable({
   onEdit,
   searchInput,
   onSearchChange,
+  productId,
 }: ContactTableProps) {
+  const { hasRole } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +33,8 @@ export function ContactTable({
     open: boolean;
     contactId: string | null;
   }>({ open: false, contactId: null });
+
+  const canEdit = hasRole(["ADMIN"]);
 
   const {
     filterParams,
@@ -56,10 +62,12 @@ export function ContactTable({
       setLoading(true);
       setError(null);
 
-      const response = await contactsService.findAll(filterParams);
+      const response = productId
+        ? await contactsService.findByProductId(productId, filterParams)
+        : await contactsService.findAll(filterParams);
 
       setContacts(response.data);
-      setMeta(response.meta);
+      setMeta(response.pagination);
     } catch (err: any) {
       setError(err.message || "Error al cargar contactos");
       setContacts([]);
@@ -70,7 +78,7 @@ export function ContactTable({
 
   useEffect(() => {
     loadContacts();
-  }, [filterParams]);
+  }, [filterParams, productId]);
 
   const handleDelete = (id: string) => {
     setConfirmDialog({ open: true, contactId: id });
@@ -131,22 +139,26 @@ export function ContactTable({
       header: "Acciones",
       render: (contact: Contact) => (
         <div className="flex justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(contact)}
-            title="Editar"
-          >
-            <Pencil className="w-4 h-4 text-blue-600" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(contact.id)}
-            title="Eliminar"
-          >
-            <Trash2 className="w-4 h-4 text-red-600" />
-          </Button>
+          {canEdit && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(contact)}
+                title="Editar"
+              >
+                <Pencil className="w-4 h-4 text-blue-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(contact.id)}
+                title="Eliminar"
+              >
+                <Trash2 className="w-4 h-4 text-red-600" />
+              </Button>
+            </>
+          )}
         </div>
       ),
     },

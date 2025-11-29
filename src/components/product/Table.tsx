@@ -10,6 +10,7 @@ import { productsService } from "@/services/products.service";
 import { usePagination } from "@/hooks/usePagination";
 import { unitLabels, type ProductUnit } from "@/types/product";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ProductTableProps {
   onEdit: (product: Product) => void;
@@ -23,6 +24,7 @@ export function ProductTable({
   onSearchChange,
 }: ProductTableProps) {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,8 @@ export function ProductTable({
     open: boolean;
     productId: string | null;
   }>({ open: false, productId: null });
+
+  const canEdit = hasRole(["ADMIN"]);
 
   const pagination = usePagination({
     initialPage: 1,
@@ -50,7 +54,7 @@ export function ProductTable({
       const response = await productsService.findAll(params);
 
       setProducts(response.data);
-      pagination.updateFromMeta(response.meta);
+      pagination.updateFromMeta(response.pagination);
     } catch (err: any) {
       setError(err.message || "Error al cargar productos");
       setProducts([]);
@@ -147,22 +151,26 @@ export function ProductTable({
           >
             <Eye className="w-4 h-4 text-gray-700" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(product)}
-            title="Editar"
-          >
-            <Pencil className="w-4 h-4 text-blue-600" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(product.id)}
-            title="Eliminar"
-          >
-            <Trash2 className="w-4 h-4 text-red-600" />
-          </Button>
+          {canEdit && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(product)}
+                title="Editar"
+              >
+                <Pencil className="w-4 h-4 text-blue-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(product.id)}
+                title="Eliminar"
+              >
+                <Trash2 className="w-4 h-4 text-red-600" />
+              </Button>
+            </>
+          )}
         </div>
       ),
     },

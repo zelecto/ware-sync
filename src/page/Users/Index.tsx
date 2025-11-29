@@ -14,13 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBreadcrumbItem } from "@/hooks/useBreadcrumbItem";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Index() {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const [filter, setFilter] = useState<"ALL" | UserRole>("ALL");
   const [searchInput, setSearchInput] = useState("");
 
   useBreadcrumbItem("Usuarios");
+
+  const canCreate = hasRole(["ADMIN"]);
 
   const handleEdit = (user: any) => {
     navigate(`/users/edit/${user.id}`);
@@ -30,10 +34,12 @@ export default function Index() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Usuarios</h1>
-        <Button onClick={() => navigate("/users/create")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Crear nuevo
-        </Button>
+        {canCreate && (
+          <Button onClick={() => navigate("/users/create")}>
+            <Plus className="w-4 h-4 mr-2" />
+            Crear nuevo
+          </Button>
+        )}
       </div>
 
       <Card>

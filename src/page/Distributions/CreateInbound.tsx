@@ -49,7 +49,6 @@ export default function CreateSupplierInbound() {
 
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Buscar producto por SKU
         const sku = urlParams.get("sku");
         if (sku && productsResponse.data.length > 0) {
           const product = productsResponse.data.find((p) => p.sku === sku);
@@ -58,7 +57,6 @@ export default function CreateSupplierInbound() {
           }
         }
 
-        // Buscar bodega por nombre
         const warehouseName = urlParams.get("warehouse");
         if (warehouseName && warehousesResponse.data.length > 0) {
           const warehouse = warehousesResponse.data.find(

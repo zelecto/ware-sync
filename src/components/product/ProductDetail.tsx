@@ -1,4 +1,5 @@
 import type React from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import {
   MessageCircle,
   Phone,
   MapPin,
+  ExternalLink,
 } from "lucide-react";
 import type { Product } from "@/types/product";
 import { unitLabels, type ProductUnit } from "@/types/product";
@@ -24,6 +26,7 @@ interface ProductDetailProps {
 }
 
 export function ProductDetail({ product }: ProductDetailProps) {
+  const navigate = useNavigate();
   const totalStock =
     product.warehouses?.reduce((acc, w) => acc + w.quantity, 0) ?? 0;
 
@@ -204,10 +207,20 @@ export function ProductDetail({ product }: ProductDetailProps) {
         {product.suppliers && product.suppliers.length > 0 && (
           <Card>
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Proveedores
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-medium flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Proveedores
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/contacts?productId=${product.id}`)}
+                >
+                  Ver todos los proveedores
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
