@@ -56,7 +56,7 @@ const menuItems = [
     roles: [UserRole.ADMIN, UserRole.WORKER],
   },
   {
-    title: "Transferencias",
+    title: "Distribuciones",
     url: "/distributions",
     icon: Truck,
     roles: [UserRole.ADMIN, UserRole.WORKER],

@@ -86,7 +86,7 @@ export function SupplierInboundTable({
                           {distribution.contact.person.fullName}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {distribution.contact.type}
+                          Distribuidor
                         </div>
                       </div>
                     ) : (

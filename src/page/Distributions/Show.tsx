@@ -70,7 +70,7 @@ export default function ShowDistribution() {
     try {
       const isSupplierInbound =
         distribution?.type === DistributionType.SUPPLIER_INBOUND;
-      const entityName = isSupplierInbound ? "entrada" : "transferencia";
+      const entityName = isSupplierInbound ? "entrada" : "distribución";
 
       if (confirmDialog.type === "complete") {
         await distributionsService.complete(id);
@@ -91,7 +91,7 @@ export default function ShowDistribution() {
     } catch (error: any) {
       const isSupplierInbound =
         distribution?.type === DistributionType.SUPPLIER_INBOUND;
-      const entityName = isSupplierInbound ? "entrada" : "transferencia";
+      const entityName = isSupplierInbound ? "entrada" : "distribución";
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
@@ -136,26 +136,26 @@ export default function ShowDistribution() {
           confirmDialog.type === "complete"
             ? distribution?.type === DistributionType.SUPPLIER_INBOUND
               ? "Completar Entrada"
-              : "Completar Transferencia"
+              : "Completar Distribución"
             : distribution?.type === DistributionType.SUPPLIER_INBOUND
             ? "Cancelar Entrada"
-            : "Cancelar Transferencia"
+            : "Cancelar Distribución"
         }
         description={
           confirmDialog.type === "complete"
             ? distribution?.type === DistributionType.SUPPLIER_INBOUND
               ? "¿Está seguro de completar esta entrada? Los productos se agregarán al inventario y esta acción no se puede deshacer."
-              : "¿Está seguro de completar esta transferencia? Esta acción actualizará los inventarios y no se puede deshacer."
+              : "¿Está seguro de completar esta distribución? Esta acción actualizará los inventarios y no se puede deshacer."
             : distribution?.type === DistributionType.SUPPLIER_INBOUND
             ? "¿Está seguro de cancelar esta entrada? Solo cambiará el estado, no afecta el inventario."
-            : "¿Está seguro de cancelar esta transferencia? Esta acción devolverá el stock a la bodega de origen."
+            : "¿Está seguro de cancelar esta distribución? Esta acción devolverá el stock a la bodega de origen."
         }
         confirmText={
           confirmDialog.type === "complete"
             ? "Completar"
             : distribution?.type === DistributionType.SUPPLIER_INBOUND
             ? "Cancelar Entrada"
-            : "Cancelar Transferencia"
+            : "Cancelar Distribución"
         }
         variant={confirmDialog.type === "cancel" ? "destructive" : "default"}
       />

@@ -130,11 +130,6 @@ export function ContactTable({
       accessor: (contact: Contact) => contact.person.phone,
     },
     {
-      key: "type",
-      header: "Tipo",
-      render: () => getContactTypeBadge(),
-    },
-    {
       key: "actions",
       header: "Acciones",
       render: (contact: Contact) => (

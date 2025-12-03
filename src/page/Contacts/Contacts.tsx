@@ -64,22 +64,6 @@ export default function Contacts() {
         )}
       </div>
 
-      {product && (
-        <div className="mb-4">
-          <Badge variant="secondary" className="text-sm py-2 px-3">
-            Filtrando por producto: {product.name}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-2 h-4 w-4 p-0 hover:bg-transparent"
-              onClick={clearProductFilter}
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </Badge>
-        </div>
-      )}
-
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center gap-4 w-full">

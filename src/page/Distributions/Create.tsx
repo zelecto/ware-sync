@@ -17,7 +17,7 @@ export default function CreateDistribution() {
   const [products, setProducts] = useState<Product[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
-  useBreadcrumbItem("Crear Transferencia");
+  useBreadcrumbItem("Crear Distribución");
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,13 +43,13 @@ export default function CreateDistribution() {
     try {
       setLoading(true);
       await distributionsService.createWarehouseTransfer(values);
-      toast.success("Transferencia creada exitosamente");
+      toast.success("Distribución creada exitosamente");
       navigate("/distributions");
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Error al crear la transferencia";
+        "Error al crear la distribución";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -71,9 +71,9 @@ export default function CreateDistribution() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Crear Transferencia</h1>
+        <h1 className="text-2xl font-bold">Crear Distribución</h1>
         <p className="text-muted-foreground">
-          Transfiera productos entre bodegas
+          Distribuya productos entre bodegas
         </p>
       </div>
       <DistributionForm

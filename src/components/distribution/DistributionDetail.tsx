@@ -49,7 +49,7 @@ export function DistributionDetail({
     distribution.type === DistributionType.SUPPLIER_INBOUND;
   const title = isSupplierInbound
     ? "Detalle de Entrada"
-    : "Detalle de Transferencia";
+    : "Detalle de Distribución";
 
   return (
     <div className="space-y-6">
@@ -148,7 +148,7 @@ export function DistributionDetail({
                   <CheckCircle className="h-4 w-4" />
                   {isSupplierInbound
                     ? "Completar Entrada"
-                    : "Completar Transferencia"}
+                    : "Completar Distribución"}
                 </Button>
                 <Button
                   variant="destructive"
@@ -158,7 +158,7 @@ export function DistributionDetail({
                   <XCircle className="h-4 w-4" />
                   {isSupplierInbound
                     ? "Cancelar Entrada"
-                    : "Cancelar Transferencia"}
+                    : "Cancelar Distribución"}
                 </Button>
               </div>
             )}

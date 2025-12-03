@@ -113,9 +113,9 @@ export function DistributionForm({
           <Form>
             <Card className="max-w-lg">
               <CardHeader>
-                <h2 className="text-lg font-semibold">Nueva Transferencia</h2>
+                <h2 className="text-lg font-semibold">Nueva Distribución</h2>
                 <p className="text-sm text-muted-foreground">
-                  Transfiera productos entre bodegas
+                  Distribuya productos entre bodegas
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -361,7 +361,7 @@ export function DistributionForm({
                     Cancelar
                   </Button>
                   <Button type="submit" disabled={loading}>
-                    {loading ? "Creando..." : "Crear Transferencia"}
+                    {loading ? "Creando..." : "Crear Distribución"}
                   </Button>
                 </div>
               </CardContent>

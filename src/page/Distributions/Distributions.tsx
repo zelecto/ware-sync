@@ -30,7 +30,7 @@ export default function Distributions() {
     initialLimit: 10,
   });
 
-  useBreadcrumbItem("Transferencias");
+  useBreadcrumbItem("Distribuciones");
 
   const loadDistributions = async () => {
     try {
@@ -49,7 +49,7 @@ export default function Distributions() {
       setDistributions(warehouseTransfers);
       pagination.updateFromMeta(meta);
     } catch (error: any) {
-      toast.error("Error al cargar las transferencias");
+      toast.error("Error al cargar las distribuciones");
       setDistributions([]);
     } finally {
       setLoading(false);
@@ -78,10 +78,10 @@ export default function Distributions() {
     try {
       if (confirmDialog.type === "complete") {
         await distributionsService.complete(confirmDialog.distributionId);
-        toast.success("Transferencia completada exitosamente");
+        toast.success("Distribución completada exitosamente");
       } else if (confirmDialog.type === "cancel") {
         await distributionsService.cancel(confirmDialog.distributionId);
-        toast.success("Transferencia cancelada exitosamente");
+        toast.success("Distribución cancelada exitosamente");
       }
       loadDistributions();
     } catch (error: any) {
@@ -90,7 +90,7 @@ export default function Distributions() {
         error.message ||
         `Error al ${
           confirmDialog.type === "complete" ? "completar" : "cancelar"
-        } la transferencia`;
+        } la distribución`;
       toast.error(errorMessage);
     }
   };
@@ -99,18 +99,18 @@ export default function Distributions() {
     switch (confirmDialog.type) {
       case "complete":
         return {
-          title: "Completar Transferencia",
+          title: "Completar Distribución",
           description:
-            "¿Está seguro de completar esta transferencia? Esta acción actualizará los inventarios y no se puede deshacer.",
+            "¿Está seguro de completar esta distribución? Esta acción actualizará los inventarios y no se puede deshacer.",
           confirmText: "Completar",
           variant: "default" as const,
         };
       case "cancel":
         return {
-          title: "Cancelar Transferencia",
+          title: "Cancelar Distribución",
           description:
-            "¿Está seguro de cancelar esta transferencia? Esta acción devolverá el stock a la bodega de origen.",
-          confirmText: "Cancelar Transferencia",
+            "¿Está seguro de cancelar esta distribución? Esta acción devolverá el stock a la bodega de origen.",
+          confirmText: "Cancelar Distribución",
           variant: "destructive" as const,
         };
       default:
@@ -126,20 +126,20 @@ export default function Distributions() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Transferencias entre Bodegas</h1>
+        <h1 className="text-2xl font-bold">Distribuciones entre Bodegas</h1>
         {canCreate && (
           <Button onClick={() => navigate("/distributions/create")}>
             <Plus className="w-4 h-4 mr-2" />
-            Nueva Transferencia
+            Nueva Distribución
           </Button>
         )}
       </div>
 
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold">Lista de Transferencias</h2>
+          <h2 className="text-lg font-semibold">Lista de Distribuciones</h2>
           <p className="text-sm text-muted-foreground">
-            Gestione las transferencias de productos entre bodegas
+            Gestione las distribuciones de productos entre bodegas
           </p>
         </CardHeader>
         <CardContent>
@@ -159,7 +159,7 @@ export default function Distributions() {
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
                     Página {pagination.currentPage} de {pagination.totalPages} (
-                    {pagination.total} transferencias)
+                    {pagination.total} distribuciones)
                   </div>
                   <div className="flex gap-2">
                     <Button
