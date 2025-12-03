@@ -164,7 +164,13 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold">
-                ${dashboardData.totalInventoryValue}
+                $
+                {Number.parseFloat(
+                  dashboardData.totalInventoryValue
+                ).toLocaleString("es-MX", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 Valor total estimado

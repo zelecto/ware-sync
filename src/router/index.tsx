@@ -33,17 +33,17 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        index: true,
-        element: <Home />,
-      },
-      {
         element: <PublicRoute />,
         children: [
           {
-            path: "login",
+            index: true,
             element: <Login />,
           },
         ],
+      },
+      {
+        path: "home",
+        element: <Home />,
       },
     ],
   },

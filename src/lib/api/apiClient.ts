@@ -65,14 +65,14 @@ class ApiClient {
           // Token expirado o no autorizado
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          // Solo redirigir si no estamos ya en login
-          if (!window.location.pathname.includes("/login")) {
+          // Solo redirigir si no estamos ya en la raíz
+          if (window.location.pathname !== "/") {
             // Guardar la ruta actual para redirigir después del login
             localStorage.setItem(
               "redirectAfterLogin",
               window.location.pathname
             );
-            window.location.href = "/login";
+            window.location.href = "/";
           }
         }
         return Promise.reject(error);

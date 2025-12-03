@@ -16,7 +16,6 @@ import {
   MessageCircle,
   Phone,
   MapPin,
-  ExternalLink,
 } from "lucide-react";
 import type { Product } from "@/types/product";
 import { unitLabels, type ProductUnit } from "@/types/product";
@@ -207,20 +206,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
         {product.suppliers && product.suppliers.length > 0 && (
           <Card>
             <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Proveedores
-                </CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/contacts?productId=${product.id}`)}
-                >
-                  Ver todos los proveedores
-                  <ExternalLink className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Proveedores
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
